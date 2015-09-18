@@ -8,16 +8,16 @@ module Blueprint
       @tokens = []
       @current_token = ""
 
-      input.chars.each do |c|
-        if c == "\s"
+      input.chars.each do |char|
+        if char == "\s"
           finish_token
-        elsif c == "(" || c == ")"
+        elsif char == "(" || char == ")"
           finish_token
-          @tokens << c
-        elsif c =~ /[\w*+-\/\$\#]/
-          @current_token += c
+          @tokens << char
+        elsif char =~ /[\w*+-\/\$\#]/
+          @current_token += char
         else
-          raise "unknown character \"#{c}\""
+          raise "unknown character \"#{char}\""
         end
       end
       finish_token
