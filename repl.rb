@@ -16,10 +16,9 @@ module Blueprint
 
     def exec_line(input)
       tokens = Lexer.new(input.strip).tokenize
-      ast = Parser.new.parse(tokens)
-      evaluator = Evaluator.new
+      ast = Parser.new(tokens).parse
 
-      ast.map { |expr| evaluator.eval(expr) }.join("\n")
+      ast.map { |expr| Evaluator.new.eval(expr) }.join("\n")
     end
   end
 end

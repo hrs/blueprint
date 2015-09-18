@@ -27,26 +27,25 @@ end
 
 describe Blueprint::Parser do
   describe "#parse" do
-    def parser
-      Blueprint::Parser.new
-    end
-
     it "should handle integers" do
-      expect(parser.parse(["123"])).to eq([123])
+      parser = Blueprint::Parser.new(["123"])
+      expect(parser.parse).to eq([123])
     end
 
     it "should handle symbols" do
-      expect(parser.parse(["abc"])).to eq([:abc])
+      parser = Blueprint::Parser.new(["abc"])
+      expect(parser.parse).to eq([:abc])
     end
 
     it "should handle simple s-expressions" do
-      expect(parser.parse(["(", "+", "1", "2", ")"])).
+      parser = Blueprint::Parser.new(["(", "+", "1", "2", ")"])
+      expect(parser.parse).
         to eq([[:+, 1, 2]])
     end
 
     it "should handle nested s-expressions" do
-      expect(parser.parse(["(", "+", "(", "-", "4", "3", ")", "2", ")"])).
-        to eq([[:+, [:-, 4, 3], 2]])
+      parser = Blueprint::Parser.new(["(", "+", "(", "-", "4", "3", ")", "2", ")"])
+      expect(parser.parse).to eq([[:+, [:-, 4, 3], 2]])
     end
   end
 end
