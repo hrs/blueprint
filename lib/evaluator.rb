@@ -13,6 +13,8 @@ module Blueprint
         exp.second
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
+      elsif exp.first == :let
+        eval(let_to_lambda(exp), env)
       elsif exp.first == :cond
         evcond(exp.drop(1), env)
       else
@@ -36,6 +38,15 @@ module Blueprint
       else
         raise "\"#{proc}\" isn't applicable."
       end
+    end
+
+    def let_to_lambda(exp)
+      variables = exp[1].map(&:first)
+      assignments = exp[1].map(&:last)
+      body = exp.drop(2)
+      [[:lambda, variables,
+          *body],
+        *assignments]
     end
 
     def global_env
