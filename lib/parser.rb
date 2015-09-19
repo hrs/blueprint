@@ -1,62 +1,83 @@
+require "parslet"
+
 module Blueprint
-  class Parser
-    def initialize(tokens)
-      @tokens = tokens
+  class Parser < Parslet::Parser
+    def initialize(input)
+      @input = input
     end
 
     def parse
-      if tokens.is_a?(Array)
-        parse_array
-      elsif tokens.chars.all? { |char| char =~ /\d/ }
-        parse_integer
-      else
-        parse_symbol
-      end
+      Transformer.new.apply(super(@input))
     end
 
-    private
+    root(:program)
 
-    def parse_array
-      ast = []
-      depth = 0
-      sub_expression = []
-
-      tokens.each do |token|
-        if token == "("
-          if depth != 0
-            sub_expression << token
-          end
-          depth += 1
-        elsif token == ")"
-          depth -= 1
-          if depth == 0
-            ast << self.class.new(sub_expression).parse
-            sub_expression = []
-          else
-            sub_expression << token
-          end
-        elsif depth == 0
-          ast << self.class.new(token).parse
-        else
-          sub_expression << token
-        end
-      end
-
-      if !sub_expression.empty?
-        ast << self.class.new(sub_expression).parse
-      end
-
-      ast
+    rule(:program) do
+      sexpr.repeat.as(:program)
     end
 
-    def parse_integer
-      tokens.to_i
+    rule(:sexpr) do
+      (
+        space? >>
+        (
+          atom |
+          str("(") >> sexpr.repeat >> str(")")
+        ) >>
+        space?
+      ).as(:sexpr)
     end
 
-    def parse_symbol
-      tokens.to_sym
+    rule(:atom) do
+      symbol | integer
     end
 
-    attr_reader :tokens
+    rule(:integer) do
+      (
+        zero |
+        (
+          str("-").maybe >>
+          nonzero >>
+          digit.repeat
+        )
+      ).as(:integer)
+    end
+
+    rule(:digit) do
+      match("[0-9]")
+    end
+
+    rule(:nonzero) do
+      match("[1-9]")
+    end
+
+    rule(:zero) do
+      str("0")
+    end
+
+    rule(:symbol) do
+      match(/[a-z]|\-|\+|\*|\/|\#/).repeat(1).as(:symbol)
+    end
+
+    rule(:space?) do
+      match(/\s/).repeat
+    end
+  end
+
+  class Transformer < Parslet::Transform
+    rule sexpr: subtree(:a) do
+      a
+    end
+
+    rule program: subtree(:a) do
+      a
+    end
+
+    rule integer: simple(:a) do
+      a.to_i
+    end
+
+    rule symbol: simple(:a) do
+      a.to_sym
+    end
   end
 end

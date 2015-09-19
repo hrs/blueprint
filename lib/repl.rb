@@ -1,4 +1,3 @@
-require_relative "lexer"
 require_relative "parser"
 require_relative "evaluator"
 
@@ -15,10 +14,10 @@ module Blueprint
     private
 
     def exec_line(input)
-      tokens = Lexer.new(input.strip).tokenize
-      ast = Parser.new(tokens).parse
+      ast = Blueprint::Parser.new(input).parse
+      evaluator = Evaluator.new
 
-      ast.map { |expr| Evaluator.new.eval(expr) }.join("\n")
+      ast.map { |expr| evaluator.eval(expr) }.join("\n")
     end
   end
 end
