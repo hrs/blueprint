@@ -32,6 +32,14 @@ describe Blueprint::Parser do
       expect(parser.parse).to eq([:set!])
     end
 
+    it "handles empty lists" do
+      parser = Blueprint::Parser.new("()")
+      expect(parser.parse).to eq([[]])
+
+      parser = Blueprint::Parser.new("( )")
+      expect(parser.parse).to eq([[]])
+    end
+
     it "handle simple s-expressions" do
       parser = Blueprint::Parser.new("(+ 1 2)")
       expect(parser.parse).to eq([[:+, 1, 2]])

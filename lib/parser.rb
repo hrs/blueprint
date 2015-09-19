@@ -21,7 +21,8 @@ module Blueprint
         space? >>
         (
           atom |
-          str("(") >> sexpr.repeat >> str(")")
+          (str("(") >> space? >> str(")")).as(:empty_list) |
+          str("(") >> space? >> sexpr.repeat >> str(")")
         ) >>
         space?
       ).as(:sexpr)
@@ -91,6 +92,10 @@ module Blueprint
 
     rule symbol: simple(:a) do
       a.to_sym
+    end
+
+    rule empty_list: simple(:a) do
+      []
     end
   end
 end
