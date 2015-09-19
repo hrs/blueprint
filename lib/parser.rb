@@ -64,7 +64,7 @@ module Blueprint
     end
 
     rule(:symbol) do
-      match(/[a-z]|\-|\+|\*|\/|\#|\=/).repeat(1).as(:symbol)
+      match(/[a-z]|\-|\+|\*|\/|\#|\=|\!|\?/).repeat(1).as(:symbol)
     end
 
     rule(:space?) do
