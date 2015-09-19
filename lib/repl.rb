@@ -9,6 +9,7 @@ module Blueprint
         puts interpreter.eval(input)
         print "> "
       end
+      puts
     end
 
     private
