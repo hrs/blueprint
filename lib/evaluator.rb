@@ -10,7 +10,7 @@ module Blueprint
       elsif exp.is_a?(Symbol)
         env[exp]
       elsif exp.first == :quote
-        exp.second
+        exp[1]
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
       elsif exp.first == :let
