@@ -6,18 +6,15 @@ module Blueprint
     def exec
       print "> "
       while input = gets
-        puts exec_line(input)
+        puts interpreter.eval(input)
         print "> "
       end
     end
 
     private
 
-    def exec_line(input)
-      ast = Blueprint::Parser.new(input).parse
-      evaluator = Evaluator.new
-
-      ast.map { |expr| evaluator.eval(expr) }.join("\n")
+    def interpreter
+      @_interpreter ||= Interpreter.new
     end
   end
 end
