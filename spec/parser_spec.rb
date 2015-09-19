@@ -26,5 +26,10 @@ describe Blueprint::Parser do
       parser = Blueprint::Parser.new("(+ (- 4 3) 2)")
       expect(parser.parse).to eq([[:+, [:-, 4, 3], 2]])
     end
+
+    it "handles conditionals" do
+      parser = Blueprint::Parser.new("(cond ((== 1 2) 3) (else 4))")
+      expect(parser.parse).to eq([[:cond, [[:==, 1, 2], 3], [:else, 4]]])
+    end
   end
 end
