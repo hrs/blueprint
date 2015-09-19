@@ -2,7 +2,7 @@ module Blueprint
   Closure = Struct.new(:variables, :body, :env)
 
   class Evaluator
-    GLOBAL_OPERATORS = [:+, :-, :*, :/, :==]
+    PRIMITIVES = [:+, :-, :*, :/, :==]
 
     def eval(exp, env = global_env)
       if exp.is_a?(Fixnum)
@@ -50,7 +50,7 @@ module Blueprint
     end
 
     def global_env
-      GLOBAL_OPERATORS.zip(GLOBAL_OPERATORS).to_h
+      PRIMITIVES.zip(PRIMITIVES).to_h
     end
 
     def evcond(clauses, env)
@@ -70,7 +70,7 @@ module Blueprint
     end
 
     def primitive?(op)
-      GLOBAL_OPERATORS.include?(op)
+      PRIMITIVES.include?(op)
     end
 
     def apply_primop(proc, args)
