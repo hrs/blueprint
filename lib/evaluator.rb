@@ -1,6 +1,7 @@
-module Blueprint
-  Closure = Struct.new(:variables, :body, :env)
+require_relative "./closure"
+require_relative "./macro"
 
+module Blueprint
   class Evaluator
     PRIMITIVES = [:+, :-, :*, :/, :==]
 
@@ -18,11 +19,7 @@ module Blueprint
       elsif exp.first == :quote
         exp[1]
       elsif exp.first == :define
-        if exp[1].is_a?(Array)
-          env[exp[1].first] = Closure.new(exp[1].drop(1), exp[2], env)
-        else
-          env[exp[1]] = eval(exp[2], env)
-        end
+        eval_define(exp, env)
       elsif exp.first == :set!
         env.set!(exp[1], eval(exp[2], env))
       elsif exp.first == :cons
@@ -35,10 +32,10 @@ module Blueprint
         exp.drop(1).map { |e| eval(e, env) }
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
-      elsif exp.first == :let
-        eval(let_to_lambda(exp), env)
       elsif exp.first == :cond
         evcond(exp.drop(1), env)
+      elsif macro?(exp.first, env)
+        eval_macro(exp, env)
       else
         apply(
           eval(exp.first, env),
@@ -63,32 +60,53 @@ module Blueprint
       end
     end
 
-    def let_to_lambda(exp)
-      variables = exp[1].map(&:first)
-      assignments = exp[1].map(&:last)
-      body = exp.drop(2)
-      [[:lambda, variables,
-          *body],
-        *assignments]
-    end
-
     def initialize_primitives
       @env.push_frame(Frame.new(PRIMITIVES, PRIMITIVES))
     end
 
     def initialize_standard_library
       lib = {
-        :null? => Closure.new([:exp], [:==, :exp, [:quote, []]], @env),
+        let: Macro.new(
+          [:bindings, :body],
+          [:cons, [:list, [:quote, :lambda],
+                   [:map, [:lambda, [:binding], [:first, :binding]],
+                    :bindings],
+                   :body],
+           [:map, [:lambda, [:x], [:first, [:rest, :x]]], :bindings]]),
         map: Closure.new(
           [:f, :seq],
           [:cond,
            [[:null?, :seq], [:quote, []]],
            [:else, [:cons, [:f, [:first, :seq]],
-                           [:map, :f, [:rest, :seq]]]]],
+                    [:map, :f, [:rest, :seq]]]]],
           @env,
         ),
+        null?: Closure.new([:exp], [:==, :exp, [:quote, []]], @env),
       }
       @env.push_frame(Frame.new(lib.keys, lib.values))
+    end
+
+    def macro?(symbol, env)
+      env.defined?(symbol) &&
+        env[symbol].is_a?(Macro)
+    end
+
+    def eval_macro(exp, env)
+      eval(
+        apply(
+          env[exp.first].expand(exp.drop(1), env),
+          [],
+        ),
+        env,
+      )
+    end
+
+    def eval_define(exp, env)
+      if exp[1].is_a?(Array)
+        env[exp[1].first] = Closure.new(exp[1].drop(1), exp[2], env)
+      else
+        env[exp[1]] = eval(exp[2], env)
+      end
     end
 
     def evcond(clauses, env)

@@ -30,4 +30,13 @@ describe Blueprint::Interpreter do
       )).to eq([])
     end
   end
+
+  describe "let" do
+    it "expands into an equivalent lambda expression" do
+      expect(
+        interpreter.eval(
+        "(let ((x 3) (y 4)) (+ x y))"
+      )).to eq(7)
+    end
+  end
 end

@@ -35,12 +35,5 @@ describe Blueprint::Evaluator do
         [[:lambda, [:x, :y], [:+, :x, :y]], 3, 4]
       )).to eq(7)
     end
-
-    it "handles let expressions" do
-      expect(
-        evaluator.eval(
-        [:let, [[:x, 3], [:y, 4]], [:+, :x, :y]]
-      )).to eq(7)
-    end
   end
 end
