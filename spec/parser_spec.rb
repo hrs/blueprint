@@ -7,6 +7,11 @@ describe Blueprint::Parser do
       expect(parser.parse).to eq([123])
     end
 
+    it "should handle floats" do
+      parser = Blueprint::Parser.new("-0.123")
+      expect(parser.parse).to eq([-0.123])
+    end
+
     it "should handle symbols" do
       parser = Blueprint::Parser.new("abc")
       expect(parser.parse).to eq([:abc])

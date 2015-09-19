@@ -28,7 +28,7 @@ module Blueprint
     end
 
     rule(:atom) do
-      symbol | integer
+      float | symbol | integer
     end
 
     rule(:integer) do
@@ -40,6 +40,15 @@ module Blueprint
           digit.repeat
         )
       ).as(:integer)
+    end
+
+    rule(:float) do
+      (
+        str("-").maybe >>
+        digit.repeat(1) >>
+        str(".") >>
+        digit.repeat(1)
+      ).as(:float)
     end
 
     rule(:digit) do
@@ -74,6 +83,10 @@ module Blueprint
 
     rule integer: simple(:a) do
       a.to_i
+    end
+
+    rule float: simple(:a) do
+      a.to_f
     end
 
     rule symbol: simple(:a) do
