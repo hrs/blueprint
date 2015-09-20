@@ -7,6 +7,7 @@ module Blueprint
     def initialize
       @env = Environment.new
       initialize_primitives
+      initialize_standard_library
     end
 
     def eval(exp, env = @env)
@@ -71,6 +72,13 @@ module Blueprint
 
     def initialize_primitives
       @env.push_frame(Frame.new(PRIMITIVES, PRIMITIVES))
+    end
+
+    def initialize_standard_library
+      lib = {
+        :null? => Closure.new([:exp], [:==, :exp, [:quote, []]], @env),
+      }
+      @env.push_frame(Frame.new(lib.keys, lib.values))
     end
 
     def evcond(clauses, env)
