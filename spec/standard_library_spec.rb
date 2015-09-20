@@ -39,4 +39,21 @@ describe Blueprint::Interpreter do
       )).to eq(7)
     end
   end
+
+  describe "if" do
+    it "expands into the equivalent cond expression" do
+      expect(
+        interpreter.eval(
+        "(if (== 1 2) 3 4)"
+      )).to eq(4)
+    end
+
+    it "doesn't inadvertently execute the alternative branch" do
+      expect(
+        interpreter.eval(
+        "(let ((a 3))" \
+        "(if (== 1 2) (set! a 12) a))" \
+      )).to eq(3)
+    end
+  end
 end

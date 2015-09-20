@@ -72,6 +72,12 @@ module Blueprint
 
     def initialize_standard_library
       lib = {
+        if: Macro.new(
+          [:condition, :consequent, :alternative],
+          [:list, [:quote, :cond],
+           [:list, :condition, :consequent],
+           [:list, [:quote, :else], :alternative]],
+        ),
         let: Macro.new(
           [:bindings, :body],
           [:cons, [:list, [:quote, :lambda],
