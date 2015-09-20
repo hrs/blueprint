@@ -26,7 +26,7 @@ module Blueprint
       elsif exp.first == :set!
         env.set!(exp[1], eval(exp[2], env))
       elsif exp.first == :cons
-        [eval(exp[1], exp), *eval(exp[2], env)]
+        [eval(exp[1], env), *eval(exp[2], env)]
       elsif exp.first == :first
         evfirst(exp, env)
       elsif exp.first == :rest
