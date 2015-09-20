@@ -77,6 +77,14 @@ module Blueprint
     def initialize_standard_library
       lib = {
         :null? => Closure.new([:exp], [:==, :exp, [:quote, []]], @env),
+        map: Closure.new(
+          [:f, :seq],
+          [:cond,
+           [[:null?, :seq], [:quote, []]],
+           [:else, [:cons, [:f, [:first, :seq]],
+                           [:map, :f, [:rest, :seq]]]]],
+          @env,
+        ),
       }
       @env.push_frame(Frame.new(lib.keys, lib.values))
     end
