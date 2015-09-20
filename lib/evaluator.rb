@@ -11,6 +11,12 @@ module Blueprint
         env[exp]
       elsif exp.first == :quote
         exp[1]
+      elsif exp.first == :cons
+        [eval(exp[1], exp), *eval(exp[2], env)]
+      elsif exp.first == :first
+        evfirst(exp, env)
+      elsif exp.first == :rest
+        evrest(exp, env)
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
       elsif exp.first == :let
@@ -62,6 +68,26 @@ module Blueprint
         eval(true_clause[1], env)
       else
         []
+      end
+    end
+
+    def evfirst(exp, env)
+      result = eval(exp[1], env)
+
+      if result.respond_to?(:size) && result.size > 0
+        result.first
+      else
+        raise "can't get \"first\" of \"#{result}\""
+      end
+    end
+
+    def evrest(exp, env)
+      result = eval(exp[1], env)
+
+      if result.respond_to?(:size) && result.size > 0
+        result.drop(1)
+      else
+        raise "can't get \"rest\" of \"#{result}\""
       end
     end
 
