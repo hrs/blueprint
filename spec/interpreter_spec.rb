@@ -82,4 +82,17 @@ describe Blueprint::Interpreter do
       "(my-let ((a 2) (b 3)) (+ a b))"
     )).to eq(5)
   end
+
+  it "supports defining anaphoric macros" do
+    expect(
+      interpreter.eval(
+      "(defmacro (aif condition consequent alternative)" \
+      "  (list (quote let) (list (list (quote it) condition))" \
+      "               (list (quote if) (quote it) consequent alternative)))" \
+      "(define (square x) (* x x))" \
+      "(aif (+ 1 2 3 4)" \
+      "     (square it)" \
+      "     0)" \
+    )).to eq(100)
+  end
 end
