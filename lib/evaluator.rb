@@ -9,6 +9,7 @@ module Blueprint
       @env = Environment.new
       initialize_primitives
       initialize_standard_library
+      @env.push_frame
     end
 
     def eval(exp, env = @env)
