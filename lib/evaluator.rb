@@ -16,6 +16,8 @@ module Blueprint
         env[exp]
       elsif exp.first == :quote
         exp[1]
+      elsif exp.first == :set!
+        env.set!(exp[1], eval(exp[2], env))
       elsif exp.first == :cons
         [eval(exp[1], exp), *eval(exp[2], env)]
       elsif exp.first == :first

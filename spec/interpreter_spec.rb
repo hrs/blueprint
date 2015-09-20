@@ -40,4 +40,12 @@ describe Blueprint::Interpreter do
       interpreter.eval("(rest (quote ()))")
     }.to raise_error(StandardError)
   end
+
+  it "can set! a variable in a let expression" do
+    expect(interpreter.eval("(let ((a 1)) (set! a 2) a)")).to eq(2)
+  end
+
+  it "can set! a variable in a nested let expression" do
+    expect(interpreter.eval("(let ((a 1)) (let ((b 2)) (set! a 2)) a)")).to eq(2)
+  end
 end
