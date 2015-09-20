@@ -41,6 +41,11 @@ describe Blueprint::Interpreter do
     }.to raise_error(StandardError)
   end
 
+  it "handles list" do
+    expect(interpreter.eval("(list 1 2 3)")).to eq([1, 2, 3])
+    expect(interpreter.eval("(define a 3) (list 1 2 a)")).to eq([1, 2, 3])
+  end
+
   it "can set! a variable in a let expression" do
     expect(interpreter.eval("(let ((a 1)) (set! a 2) a)")).to eq(2)
   end

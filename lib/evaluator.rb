@@ -31,6 +31,8 @@ module Blueprint
         evfirst(exp, env)
       elsif exp.first == :rest
         evrest(exp, env)
+      elsif exp.first == :list
+        exp.drop(1).map { |e| eval(e, env) }
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
       elsif exp.first == :let
