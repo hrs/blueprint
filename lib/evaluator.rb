@@ -16,6 +16,12 @@ module Blueprint
         env[exp]
       elsif exp.first == :quote
         exp[1]
+      elsif exp.first == :define
+        if exp[1].is_a?(Array)
+          env[exp[1].first] = Closure.new(exp[1].drop(1), exp[2], env)
+        else
+          env[exp[1]] = eval(exp[2], env)
+        end
       elsif exp.first == :set!
         env.set!(exp[1], eval(exp[2], env))
       elsif exp.first == :cons

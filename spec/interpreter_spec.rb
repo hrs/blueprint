@@ -48,4 +48,20 @@ describe Blueprint::Interpreter do
   it "can set! a variable in a nested let expression" do
     expect(interpreter.eval("(let ((a 1)) (let ((b 2)) (set! a 2)) a)")).to eq(2)
   end
+
+  it "can define a variable" do
+    expect(interpreter.eval("(define a 2) a")).to eq(2)
+  end
+
+  it "can define a function" do
+    expect(interpreter.eval("(define (square x) (* x x)) (square 3)")).to eq(9)
+  end
+
+  it "handles recursion" do
+    expect(
+      interpreter.eval(
+      "(define (fact n) (cond ((== n 0) 1) (else (* n (fact (- n 1))))))" \
+      "(fact 6)"
+    )).to eq(720)
+  end
 end
