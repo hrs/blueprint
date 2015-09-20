@@ -72,6 +72,15 @@ module Blueprint
 
     def initialize_standard_library
       lib = {
+        filter: Closure.new(
+          [:pred, :seq],
+          [:reduce,
+           [:lambda, [:x, :y],
+            [:if, [:pred, :x], [:cons, :x, :y], :y]],
+           [:quote, []],
+           :seq],
+          @env,
+        ),
         if: Macro.new(
           [:condition, :consequent, :alternative],
           [:list, [:quote, :cond],
@@ -98,7 +107,7 @@ module Blueprint
           [:if, [:null?, :seq],
            :acc,
            [:reduce, :f,
-            [:f, :acc, [:first, :seq]],
+            [:f, [:first, :seq], :acc],
             [:rest, :seq]]],
           @env,
         ),

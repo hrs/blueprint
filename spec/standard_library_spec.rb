@@ -19,7 +19,7 @@ describe Blueprint::Interpreter do
     it "maps a function across a list" do
       expect(
         interpreter.eval(
-        "(map (lambda (n) (+ 1 n)) (quote (1 2 3)))"
+        "(map (lambda (n) (+ 1 n)) (list 1 2 3))"
       )).to eq([2, 3, 4])
     end
 
@@ -37,6 +37,15 @@ describe Blueprint::Interpreter do
         interpreter.eval(
         "(reduce (lambda (x y) (+ x y)) 0 (list 1 2 3 4))"
       )).to eq(10)
+    end
+  end
+
+  describe "filter" do
+    it "can select elements of a list that match a predicate" do
+      expect(
+        interpreter.eval(
+        "(filter (lambda (x) (== x 3)) (list 1 3 4 5 2 3 3 5))"
+      )).to eq([3, 3, 3])
     end
   end
 
