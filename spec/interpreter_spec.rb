@@ -69,4 +69,17 @@ describe Blueprint::Interpreter do
       "(fact 6)"
     )).to eq(720)
   end
+
+  it "supports user-defined macros" do
+    expect(
+      interpreter.eval(
+      "(defmacro (my-let bindings body)" \
+      "  (cons (list (quote lambda)" \
+      "              (map (lambda (binding) (first binding))" \
+      "                   bindings)" \
+      "              body)" \
+      "        (map (lambda (x) (first (rest x))) bindings)))" \
+      "(my-let ((a 2) (b 3)) (+ a b))"
+    )).to eq(5)
+  end
 end

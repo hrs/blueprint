@@ -32,6 +32,11 @@ module Blueprint
         exp.drop(1).map { |e| eval(e, env) }
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
+      elsif exp.first == :defmacro
+        env[exp[1][0]] = Macro.new(
+          exp[1].drop(1),
+          exp[2],
+        )
       elsif exp.first == :cond
         evcond(exp.drop(1), env)
       elsif macro?(exp.first, env)
