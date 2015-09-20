@@ -1,5 +1,8 @@
 module Blueprint
   class Frame < Hash
+    def initialize(variables = [], values = [])
+      merge!(variables.zip(values).to_h)
+    end
   end
 
   class Environment
@@ -27,8 +30,8 @@ module Blueprint
       end
     end
 
-    def push_frame
-      stack.push(Frame.new)
+    def push_frame(frame = Frame.new)
+      stack.push(frame)
     end
 
     def pop_frame

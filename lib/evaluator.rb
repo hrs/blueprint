@@ -4,7 +4,12 @@ module Blueprint
   class Evaluator
     PRIMITIVES = [:+, :-, :*, :/, :==]
 
-    def eval(exp, env = global_env)
+    def initialize
+      @env = Environment.new
+      initialize_primitives
+    end
+
+    def eval(exp, env = @env)
       if exp.is_a?(Fixnum)
         exp
       elsif exp.is_a?(Symbol)
@@ -37,9 +42,10 @@ module Blueprint
       if primitive?(proc)
         apply_primop(proc, args)
       elsif proc.is_a?(Closure)
+        proc.env.push_frame(Frame.new(proc.variables, args))
         eval(
           proc.body,
-          proc.env.merge(proc.variables.zip(args).to_h),
+          proc.env,
         )
       else
         raise "\"#{proc}\" isn't applicable."
@@ -55,8 +61,8 @@ module Blueprint
         *assignments]
     end
 
-    def global_env
-      PRIMITIVES.zip(PRIMITIVES).to_h
+    def initialize_primitives
+      @env.push_frame(Frame.new(PRIMITIVES, PRIMITIVES))
     end
 
     def evcond(clauses, env)
@@ -92,7 +98,8 @@ module Blueprint
     end
 
     def bind(vars, vals, env)
-      env.merge(vars.zip(vals).to_h)
+      env.push_frame(Frame.new(vars, vals))
+      env
     end
 
     def primitive?(op)
