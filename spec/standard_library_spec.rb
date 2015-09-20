@@ -31,6 +31,15 @@ describe Blueprint::Interpreter do
     end
   end
 
+  describe "reduce" do
+    it "can sum up a list of numbers" do
+      expect(
+        interpreter.eval(
+        "(reduce (lambda (x y) (+ x y)) 0 (list 1 2 3 4))"
+      )).to eq(10)
+    end
+  end
+
   describe "let" do
     it "expands into an equivalent lambda expression" do
       expect(
