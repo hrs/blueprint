@@ -3,7 +3,7 @@ require_relative "./macro"
 
 module Blueprint
   class Evaluator
-    PRIMITIVES = [:+, :-, :*, :/, :==]
+    PRIMITIVES = [:+, :-, :*, :/, :%, :==]
 
     def initialize
       @env = Environment.new

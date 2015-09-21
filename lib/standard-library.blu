@@ -1,3 +1,6 @@
+(define (even? n)
+  (== (% n 2) 0))
+
 (define (filter pred seq)
   (reduce (lambda (x y) (if (pred x) (cons x y) y))
           (quote ())
@@ -23,6 +26,9 @@
 
 (define (null? exp)
   (== exp (quote ())))
+
+(define (odd? n)
+  (== (% n 2) 1))
 
 (define (reduce f acc seq)
   (if (null? seq)

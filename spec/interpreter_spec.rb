@@ -7,6 +7,14 @@ describe Blueprint::Interpreter do
 
   it "handles basic arithmetic" do
     expect(interpreter.eval("(+ 1 2 3)")).to eq(6)
+    expect(interpreter.eval("(- 6 2 3)")).to eq(1)
+    expect(interpreter.eval("(* 2 2 3)")).to eq(12)
+    expect(interpreter.eval("(/ 12 2 3)")).to eq(2)
+  end
+
+  it "has a modulo operator" do
+    expect(interpreter.eval("(% 12 5)")).to eq(2)
+    expect(interpreter.eval("(% 12 6)")).to eq(0)
   end
 
   it "handles quotes" do

@@ -58,6 +58,38 @@ describe Blueprint::Interpreter do
     end
   end
 
+  describe "even?" do
+    it "returns true if a number is even" do
+      expect(
+        interpreter.eval(
+        "(even? 4)"
+      )).to eq(true)
+    end
+
+    it "returns false if a number is odd" do
+      expect(
+        interpreter.eval(
+        "(even? 5)"
+      )).to eq(false)
+    end
+  end
+
+  describe "odd?" do
+    it "returns true if a number is odd" do
+      expect(
+        interpreter.eval(
+        "(odd? 5)"
+      )).to eq(true)
+    end
+
+    it "returns false if a number is even" do
+      expect(
+        interpreter.eval(
+        "(odd? 4)"
+      )).to eq(false)
+    end
+  end
+
   describe "if" do
     it "expands into the equivalent cond expression" do
       expect(
