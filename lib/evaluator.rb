@@ -70,55 +70,16 @@ module Blueprint
       @env.push_frame(Frame.new(PRIMITIVES, PRIMITIVES))
     end
 
+    def standard_library_file
+      File.join(File.dirname(__FILE__), "standard-library.blu")
+    end
+
     def initialize_standard_library
-      lib = {
-        filter: Closure.new(
-          [:pred, :seq],
-          [:reduce,
-           [:lambda, [:x, :y],
-            [:if, [:pred, :x], [:cons, :x, :y], :y]],
-           [:quote, []],
-           :seq],
-          @env,
-        ),
-        if: Macro.new(
-          [:condition, :consequent, :alternative],
-          [:list, [:quote, :cond],
-           [:list, :condition, :consequent],
-           [:list, [:quote, :else], :alternative]],
-        ),
-        let: Macro.new(
-          [:bindings, :body],
-          [:cons, [:list, [:quote, :lambda],
-                   [:map, [:lambda, [:binding], [:first, :binding]],
-                    :bindings],
-                   :body],
-           [:map, [:lambda, [:x], [:first, [:rest, :x]]], :bindings]]),
-        map: Closure.new(
-          [:f, :seq],
-          [:if, [:null?, :seq],
-           [:quote, []],
-           [:cons, [:f, [:first, :seq]],
-            [:map, :f, [:rest, :seq]]]],
-          @env,
-        ),
-        reduce: Closure.new(
-          [:f, :acc, :seq],
-          [:if, [:null?, :seq],
-           :acc,
-           [:reduce, :f,
-            [:f, [:first, :seq], :acc],
-            [:rest, :seq]]],
-          @env,
-        ),
-        null?: Closure.new([:exp], [:==, :exp, [:quote, []]], @env),
-      }
-      @env.push_frame(Frame.new(lib.keys, lib.values))
+      Interpreter.new.load_file(standard_library_file, self)
     end
 
     def macro?(symbol, env)
-      env.defined?(symbol) &&
-        env[symbol].is_a?(Macro)
+      env.defined?(symbol) && env[symbol].is_a?(Macro)
     end
 
     def eval_macro(exp, env)

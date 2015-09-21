@@ -3,9 +3,14 @@ require_relative "evaluator"
 
 module Blueprint
   class Interpreter
-    def eval(input)
-      ast = Parser.new(input).parse
-      ast.map { |expr| evaluator.eval(expr) }.last
+    def eval(input, evaluator = evaluator)
+      Parser.new(input).parse.
+        map { |expr| evaluator.eval(expr) }.
+        last
+    end
+
+    def load_file(filename, evaluater = evaluator)
+      eval(File.read(filename), evaluater)
     end
 
     private

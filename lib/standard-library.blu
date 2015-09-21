@@ -1,0 +1,32 @@
+(define (filter pred seq)
+  (reduce (lambda (x y) (if (pred x) (cons x y) y))
+          (quote ())
+          seq))
+
+(defmacro (if condition consequent alternative)
+  (list (quote cond)
+        (list condition consequent)
+        (list (quote else) alternative)))
+
+(defmacro (let bindings body)
+  (cons (list (quote lambda)
+              (map (lambda (binding) (first binding))
+                   bindings)
+              body)
+        (map (lambda (binding) (first (rest binding))) bindings)))
+
+(define (map f seq)
+  (if (null? seq)
+      (quote ())
+      (cons (f (first seq))
+            (map f (rest seq)))))
+
+(define (null? exp)
+  (== exp (quote ())))
+
+(define (reduce f acc seq)
+  (if (null? seq)
+      acc
+      (reduce f
+              (f (first seq) acc)
+              (rest seq))))
