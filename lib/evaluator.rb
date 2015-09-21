@@ -17,6 +17,8 @@ module Blueprint
         exp
       elsif exp.is_a?(Symbol)
         env[exp]
+      elsif exp == []
+        []
       elsif exp.first == :quote
         exp[1]
       elsif exp.first == :define
