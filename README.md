@@ -1,4 +1,4 @@
-### Blueprint
+### Blueprint [![Build Status](https://secure.travis-ci.org/hrs/blueprint.png?branch=master&.png)](http://travis-ci.org/hrs/blueprint)
 
 A simple little Scheme implemented in Ruby.
 
