@@ -50,6 +50,14 @@ describe Blueprint::Parser do
       expect(parser.parse).to eq([[]])
     end
 
+    it "has a shortcut for quoting" do
+      parser = Blueprint::Parser.new("'()")
+      expect(parser.parse).to eq([[:quote, []]])
+
+      parser = Blueprint::Parser.new("'(a b c)")
+      expect(parser.parse).to eq([[:quote, [:a, :b, :c]]])
+    end
+
     it "handle simple s-expressions" do
       parser = Blueprint::Parser.new("(+ 1 2)")
       expect(parser.parse).to eq([[:+, 1, 2]])

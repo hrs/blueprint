@@ -21,11 +21,16 @@ module Blueprint
         space? >>
         (
           atom |
+          quote |
           (str("(") >> space? >> str(")")).as(:empty_list) |
           str("(") >> space? >> sexpr.repeat >> str(")")
         ) >>
         space?
       ).as(:sexpr)
+    end
+
+    rule(:quote) do
+      (str("'") >> sexpr).as(:quote)
     end
 
     rule(:atom) do
@@ -89,6 +94,10 @@ module Blueprint
 
     rule program: subtree(:a) do
       a
+    end
+
+    rule quote: subtree(:a) do
+      [:quote, a]
     end
 
     rule integer: simple(:a) do
