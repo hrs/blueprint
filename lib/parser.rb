@@ -29,7 +29,7 @@ module Blueprint
     end
 
     rule(:atom) do
-      float | symbol | integer
+      float | symbol | integer | string
     end
 
     rule(:integer) do
@@ -68,6 +68,15 @@ module Blueprint
       match(/[a-z]|\-|\+|\*|\/|\#|\=|\!|\?|\%/).repeat(1).as(:symbol)
     end
 
+    rule(:string) do
+      str('"') >>
+        (
+          str('\\') >> any |
+          str('"').absent? >> any
+        ).repeat.as(:string) >>
+        str('"')
+    end
+
     rule(:space?) do
       match(/\s/).repeat
     end
@@ -92,6 +101,10 @@ module Blueprint
 
     rule symbol: simple(:a) do
       a.to_sym
+    end
+
+    rule string: simple(:s) do
+      s.to_s
     end
 
     rule empty_list: simple(:a) do

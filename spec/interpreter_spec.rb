@@ -12,6 +12,10 @@ describe Blueprint::Interpreter do
     expect(interpreter.eval("(/ 12 2 3)")).to eq(2)
   end
 
+  it "can join strings" do
+    expect(interpreter.eval("(+ \"foo\" \"bar\")")).to eq("foobar")
+  end
+
   it "has a modulo operator" do
     expect(interpreter.eval("(% 12 5)")).to eq(2)
     expect(interpreter.eval("(% 12 6)")).to eq(0)

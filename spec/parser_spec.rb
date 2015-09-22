@@ -17,6 +17,16 @@ describe Blueprint::Parser do
       expect(parser.parse).to eq([:abc])
     end
 
+    it "handle strings" do
+      parser = Blueprint::Parser.new("\"abc\"")
+      expect(parser.parse).to eq(["abc"])
+    end
+
+    it "escapes string characters" do
+      parser = Blueprint::Parser.new("\"a\\bc\"")
+      expect(parser.parse).to eq(["a\\bc"])
+    end
+
     it "handle math sigils in symbols" do
       parser = Blueprint::Parser.new("*")
       expect(parser.parse).to eq([:*])

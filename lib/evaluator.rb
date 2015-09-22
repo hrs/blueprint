@@ -13,7 +13,7 @@ module Blueprint
     end
 
     def eval(exp, env = @env)
-      if exp.is_a?(Fixnum)
+      if literal?(exp)
         exp
       elsif exp.is_a?(Symbol)
         env[exp]
@@ -78,6 +78,10 @@ module Blueprint
 
     def initialize_standard_library
       Interpreter.new.load_file(standard_library_file, self)
+    end
+
+    def literal?(exp)
+      exp.is_a?(Fixnum) || exp.is_a?(String)
     end
 
     def macro?(symbol, env)
