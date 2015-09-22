@@ -5,91 +5,93 @@ describe Blueprint::Interpreter do
     described_class.new
   end
 
+  def expect_eval(expression)
+    expect(interpreter.eval(expression))
+  end
+
   it "handles basic arithmetic" do
-    expect(interpreter.eval("(+ 1 2 3)")).to eq(6)
-    expect(interpreter.eval("(- 6 2 3)")).to eq(1)
-    expect(interpreter.eval("(* 2 2 3)")).to eq(12)
-    expect(interpreter.eval("(/ 12 2 3)")).to eq(2)
+    expect_eval("(+ 1 2 3)").to eq(6)
+    expect_eval("(- 6 2 3)").to eq(1)
+    expect_eval("(* 2 2 3)").to eq(12)
+    expect_eval("(/ 12 2 3)").to eq(2)
   end
 
   it "can join strings" do
-    expect(interpreter.eval("(+ \"foo\" \"bar\")")).to eq("foobar")
+    expect_eval("(+ \"foo\" \"bar\")").to eq("foobar")
   end
 
   it "has a modulo operator" do
-    expect(interpreter.eval("(% 12 5)")).to eq(2)
-    expect(interpreter.eval("(% 12 6)")).to eq(0)
+    expect_eval("(% 12 5)").to eq(2)
+    expect_eval("(% 12 6)").to eq(0)
   end
 
   it "handles quotes" do
-    expect(interpreter.eval("(quote (1 2 3))")).to eq([1, 2, 3])
+    expect_eval("(quote (1 2 3))").to eq([1, 2, 3])
   end
 
   it "handles syntactic sugar for quotes" do
-    expect(interpreter.eval("'a")).to eq(:a)
-    expect(interpreter.eval("'(1 2 3)")).to eq([1, 2, 3])
+    expect_eval("'a").to eq(:a)
+    expect_eval("'(1 2 3)").to eq([1, 2, 3])
   end
 
   it "handles conditionals" do
-    expect(interpreter.eval("(cond ((== 1 2) 3) (else 4))")).to eq(4)
-    expect(interpreter.eval("(cond ((== 1 1) 3) (else 4))")).to eq(3)
+    expect_eval("(cond ((== 1 2) 3) (else 4))").to eq(4)
+    expect_eval("(cond ((== 1 1) 3) (else 4))").to eq(3)
   end
 
   it "handles cons" do
-    expect(interpreter.eval("(cons 1 (quote ()))")).to eq([1])
-    expect(interpreter.eval("(cons 1 (quote (2 3)))")).to eq([1, 2, 3])
+    expect_eval("(cons 1 (quote ()))").to eq([1])
+    expect_eval("(cons 1 (quote (2 3)))").to eq([1, 2, 3])
     expect(
       interpreter.eval("(cons (quote (1 2)) (quote (3 4)))")
     ).to eq([[1, 2], 3, 4])
   end
 
   it "handles first" do
-    expect(interpreter.eval("(first (quote (1 2 3)))")).to eq(1)
+    expect_eval("(first (quote (1 2 3)))").to eq(1)
     expect {
       interpreter.eval("(first (quote ()))")
     }.to raise_error(StandardError)
   end
 
   it "handles rest" do
-    expect(interpreter.eval("(rest (quote (1)))")).to eq([])
-    expect(interpreter.eval("(rest (quote (1 2 3 4)))")).to eq([2, 3, 4])
+    expect_eval("(rest (quote (1)))").to eq([])
+    expect_eval("(rest (quote (1 2 3 4)))").to eq([2, 3, 4])
     expect {
       interpreter.eval("(rest (quote ()))")
     }.to raise_error(StandardError)
   end
 
   it "handles list" do
-    expect(interpreter.eval("(list 1 2 3)")).to eq([1, 2, 3])
-    expect(interpreter.eval("(define a 3) (list 1 2 a)")).to eq([1, 2, 3])
+    expect_eval("(list 1 2 3)").to eq([1, 2, 3])
+    expect_eval("(define a 3) (list 1 2 a)").to eq([1, 2, 3])
   end
 
   it "can set! a variable in a let expression" do
-    expect(interpreter.eval("(let ((a 1)) (set! a 2) a)")).to eq(2)
+    expect_eval("(let ((a 1)) (set! a 2) a)").to eq(2)
   end
 
   it "can set! a variable in a nested let expression" do
-    expect(interpreter.eval("(let ((a 1)) (let ((b 2)) (set! a 2)) a)")).to eq(2)
+    expect_eval("(let ((a 1)) (let ((b 2)) (set! a 2)) a)").to eq(2)
   end
 
   it "can define a variable" do
-    expect(interpreter.eval("(define a 2) a")).to eq(2)
+    expect_eval("(define a 2) a").to eq(2)
   end
 
   it "can define a function" do
-    expect(interpreter.eval("(define (square x) (* x x)) (square 3)")).to eq(9)
+    expect_eval("(define (square x) (* x x)) (square 3)").to eq(9)
   end
 
   it "handles recursion" do
-    expect(
-      interpreter.eval(
+    expect_eval(
       "(define (fact n) (cond ((== n 0) 1) (else (* n (fact (- n 1))))))" \
       "(fact 6)"
-    )).to eq(720)
+    ).to eq(720)
   end
 
   it "supports user-defined macros" do
-    expect(
-      interpreter.eval(
+    expect_eval(
       "(defmacro (my-let bindings body)" \
       "  (cons (list (quote lambda)" \
       "              (map (lambda (binding) (first binding))" \
@@ -97,12 +99,11 @@ describe Blueprint::Interpreter do
       "              body)" \
       "        (map (lambda (x) (first (rest x))) bindings)))" \
       "(my-let ((a 2) (b 3)) (+ a b))"
-    )).to eq(5)
+    ).to eq(5)
   end
 
   it "supports defining anaphoric macros" do
-    expect(
-      interpreter.eval(
+    expect_eval(
       "(defmacro (aif condition consequent alternative)" \
       "  (list (quote let) (list (list (quote it) condition))" \
       "               (list (quote if) (quote it) consequent alternative)))" \
@@ -110,7 +111,7 @@ describe Blueprint::Interpreter do
       "(aif (+ 1 2 3 4)" \
       "     (square it)" \
       "     0)" \
-    )).to eq(100)
+    ).to eq(100)
   end
 
   it "can load and evaluate code from a file" do
@@ -118,17 +119,15 @@ describe Blueprint::Interpreter do
     allow(File).to receive(:read).and_call_original
     allow(File).to receive(:read).with("square.blu").and_return(code)
 
-    expect(
-      interpreter.eval(
+    expect_eval(
       "(load \"square.blu\")" \
       "(square 3)"
-    )).to eq(9)
+    ).to eq(9)
   end
 
   it "can read ASTs from strings" do
-    expect(
-      interpreter.eval(
+    expect_eval(
       "(read \"(+ 1 2 3)\")"
-    )).to eq([[:+, 1, 2, 3]])
+    ).to eq([[:+, 1, 2, 3]])
   end
 end
