@@ -124,4 +124,11 @@ describe Blueprint::Interpreter do
       "(square 3)"
     )).to eq(9)
   end
+
+  it "can read ASTs from strings" do
+    expect(
+      interpreter.eval(
+      "(read \"(+ 1 2 3)\")"
+    )).to eq([[:+, 1, 2, 3]])
+  end
 end
