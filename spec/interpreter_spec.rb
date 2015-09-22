@@ -107,4 +107,16 @@ describe Blueprint::Interpreter do
       "     0)" \
     )).to eq(100)
   end
+
+  it "can load and evaluate code from a file" do
+    code = "(define (square x) (* x x))"
+    allow(File).to receive(:read).and_call_original
+    allow(File).to receive(:read).with("square.blu").and_return(code)
+
+    expect(
+      interpreter.eval(
+      "(load \"square.blu\")" \
+      "(square 3)"
+    )).to eq(9)
+  end
 end

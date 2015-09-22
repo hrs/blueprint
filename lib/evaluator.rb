@@ -33,6 +33,8 @@ module Blueprint
         evrest(exp, env)
       elsif exp.first == :list
         exp.drop(1).map { |e| eval(e, env) }
+      elsif exp.first == :load
+        Interpreter.new.load_file(eval(exp[1], env), self)
       elsif exp.first == :lambda
         Closure.new(exp[1], exp[2], env)
       elsif exp.first == :defmacro
