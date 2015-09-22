@@ -19,31 +19,8 @@ module Blueprint
         env[exp]
       elsif exp == []
         []
-      elsif exp.first == :quote
-        exp[1]
-      elsif exp.first == :define
-        eval_define(exp, env)
-      elsif exp.first == :set!
-        env.set!(exp[1], eval(exp[2], env))
-      elsif exp.first == :cons
-        [eval(exp[1], env), *eval(exp[2], env)]
-      elsif exp.first == :first
-        evfirst(exp, env)
-      elsif exp.first == :rest
-        evrest(exp, env)
-      elsif exp.first == :list
-        exp.drop(1).map { |e| eval(e, env) }
-      elsif exp.first == :load
-        Interpreter.new.load_file(eval(exp[1], env), self)
-      elsif exp.first == :lambda
-        Closure.new(exp[1], exp[2], env)
-      elsif exp.first == :defmacro
-        env[exp[1][0]] = Macro.new(
-          exp[1].drop(1),
-          exp[2],
-        )
-      elsif exp.first == :cond
-        evcond(exp.drop(1), env)
+      elsif special_form?(exp.first)
+        special_forms[exp.first].call(exp, env)
       elsif macro?(exp.first, env)
         eval_macro(exp, env)
       else
@@ -68,6 +45,33 @@ module Blueprint
       else
         raise "\"#{proc}\" isn't applicable."
       end
+    end
+
+    def special_forms
+      {
+        cond: -> (exp, env) { evcond(exp.drop(1), env) },
+        cons: -> (exp, env) { [eval(exp[1], env), *eval(exp[2], env)] },
+        define: -> (exp, env) { eval_define(exp, env) },
+        defmacro: -> (exp, env) { defmacro(exp, env) },
+        first: -> (exp, env) { evfirst(exp, env) },
+        lambda: -> (exp, env) { Closure.new(exp[1], exp[2], env) },
+        list: -> (exp, env) { exp.drop(1).map { |e| eval(e, env) } },
+        load: -> (exp, env) { Interpreter.new.load_file(eval(exp[1], env), self) },
+        quote: -> (exp, _) { exp[1] },
+        rest: -> (exp, env) { evrest(exp, env) },
+        set!: -> (exp, env) { env.set!(exp[1], eval(exp[2], env)) },
+      }
+    end
+
+    def special_form?(symbol)
+      special_forms.has_key?(symbol)
+    end
+
+    def defmacro(exp, env)
+      env[exp[1][0]] = Macro.new(
+        exp[1].drop(1),
+        exp[2],
+      )
     end
 
     def initialize_primitives
