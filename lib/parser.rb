@@ -21,7 +21,7 @@ module Blueprint
         space? >>
         (
           atom |
-          quote |
+          quote | quasiquote | unquote | unquote_splicing |
           (str("(") >> space? >> str(")")).as(:empty_list) |
           str("(") >> space? >> sexpr.repeat >> str(")")
         ) >>
@@ -31,6 +31,18 @@ module Blueprint
 
     rule(:quote) do
       (str("'") >> sexpr).as(:quote)
+    end
+
+    rule(:quasiquote) do
+      (str("`") >> sexpr).as(:quasiquote)
+    end
+
+    rule(:unquote) do
+      (str(",") >> sexpr).as(:unquote)
+    end
+
+    rule(:unquote_splicing) do
+      (str(",@") >> sexpr).as(:unquote_splicing)
     end
 
     rule(:atom) do
@@ -98,6 +110,18 @@ module Blueprint
 
     rule quote: subtree(:a) do
       [:quote, a]
+    end
+
+    rule quasiquote: subtree(:a) do
+      [:quasiquote, a]
+    end
+
+    rule unquote: subtree(:a) do
+      [:unquote, a]
+    end
+
+    rule unquote_splicing: subtree(:a) do
+      [:"unquote-splicing", a]
     end
 
     rule integer: simple(:a) do
