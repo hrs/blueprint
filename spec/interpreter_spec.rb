@@ -1,14 +1,6 @@
 require "spec_helper"
 
 describe Blueprint::Interpreter do
-  def interpreter
-    described_class.new
-  end
-
-  def expect_eval(expression)
-    expect(interpreter.eval(expression))
-  end
-
   it "handles basic arithmetic" do
     expect_eval("(+ 1 2 3)").to eq(6)
     expect_eval("(- 6 2 3)").to eq(1)
@@ -112,17 +104,6 @@ describe Blueprint::Interpreter do
       "     (square it)" \
       "     0)" \
     ).to eq(100)
-  end
-
-  it "can load and evaluate code from a file" do
-    code = "(define (square x) (* x x))"
-    allow(File).to receive(:read).and_call_original
-    allow(File).to receive(:read).with("square.blu").and_return(code)
-
-    expect_eval(
-      "(load \"square.blu\")" \
-      "(square 3)"
-    ).to eq(9)
   end
 
   it "can slurp the contents of a file into a string" do
