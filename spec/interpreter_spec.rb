@@ -125,6 +125,16 @@ describe Blueprint::Interpreter do
     ).to eq(9)
   end
 
+  it "can slurp the contents of a file into a string" do
+    contents = "here's some content!"
+    allow(File).to receive(:read).and_call_original
+    allow(File).to receive(:read).with("my-file.txt").and_return(contents)
+
+    expect_eval(
+      "(slurp-file \"my-file.txt\")"
+    ).to eq(contents)
+  end
+
   it "can read ASTs from strings" do
     expect_eval(
       "(read \"(+ 1 2 3)\")"

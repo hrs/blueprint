@@ -57,6 +57,7 @@ module Blueprint
         lambda: -> (exp, env) { Closure.new(exp[1], exp[2], env) },
         list: -> (exp, env) { exp.drop(1).map { |e| eval(e, env) } },
         load: -> (exp, env) { Interpreter.new.load_file(eval(exp[1], env), self) },
+        :"slurp-file" => -> (exp, env) { File.read(eval(exp[1], env)) },
         quote: -> (exp, _) { exp[1] },
         read: -> (exp, env) { Parser.new(exp[1]).parse },
         rest: -> (exp, env) { evrest(exp, env) },
