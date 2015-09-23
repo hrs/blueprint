@@ -18,6 +18,10 @@
               body)
         (map (lambda (binding) (first (rest binding))) bindings)))
 
+(define (load filename)
+  (map (lambda (sexp) (eval sexp))
+       (read (slurp-file filename))))
+
 (define (map f seq)
   (if (null? seq)
       (quote ())
