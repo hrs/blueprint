@@ -140,4 +140,16 @@ describe Blueprint::Interpreter do
       "(read \"(+ 1 2 3)\")"
     ).to eq([[:+, 1, 2, 3]])
   end
+
+  it "can apply a function to a list" do
+    expect_eval(
+      "(apply '+ '(1 2))"
+    ).to eq(3)
+  end
+
+  it "can eval lists" do
+    expect_eval(
+      "(eval '(+ 1 2))"
+    ).to eq(3)
+  end
 end

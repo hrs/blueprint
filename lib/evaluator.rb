@@ -49,10 +49,17 @@ module Blueprint
 
     def special_forms
       {
+        apply: -> (exp, env) {
+          apply(
+            eval(exp[1], env),
+            eval(exp[2], env),
+          )
+        },
         cond: -> (exp, env) { evcond(exp.drop(1), env) },
         cons: -> (exp, env) { [eval(exp[1], env), *eval(exp[2], env)] },
         define: -> (exp, env) { eval_define(exp, env) },
         defmacro: -> (exp, env) { defmacro(exp, env) },
+        eval: -> (exp, env) { eval(eval(exp[1], env), env) },
         first: -> (exp, env) { evfirst(exp, env) },
         lambda: -> (exp, env) { Closure.new(exp[1], exp[2], env) },
         list: -> (exp, env) { exp.drop(1).map { |e| eval(e, env) } },
