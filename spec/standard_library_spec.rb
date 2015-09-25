@@ -1,6 +1,16 @@
 require "spec_helper"
 
 describe Blueprint::Interpreter do
+  describe "and" do
+    it "returns true if all arguments are truthy" do
+      expect_eval("(and 1 true \"foo\")").to eq(true)
+    end
+
+    it "returns false if any arguments are falsy" do
+      expect_eval("(and 1 false \"foo\")").to eq(false)
+    end
+  end
+
   describe "even?" do
     it "returns true if a number is even" do
       expect_eval(
@@ -109,6 +119,16 @@ describe Blueprint::Interpreter do
       expect_eval(
         "(odd? 4)"
       ).to eq(false)
+    end
+  end
+
+  describe "or" do
+    it "returns true if any arguments are truthy" do
+      expect_eval("(and 1 false \"foo\")").to eq(false)
+    end
+
+    it "returns false if all arguments are falsy" do
+      expect_eval("(or false false 2)").to eq(true)
     end
   end
 

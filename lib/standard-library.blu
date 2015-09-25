@@ -1,3 +1,9 @@
+(define (and . args)
+  (cond
+   ((null? args) true)
+   ((not (first args)) false)
+   (else (apply and (rest args)))))
+
 (define (even? n)
   (== (% n 2) 0))
 
@@ -41,6 +47,11 @@
 
 (define (odd? n)
   (== (% n 2) 1))
+
+(define (or . args)
+  (cond ((null? args) false)
+        ((first args) true)
+        (else (apply or (rest args)))))
 
 (define (reduce f acc seq)
   (if (null? seq)
