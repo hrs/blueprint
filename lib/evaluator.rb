@@ -15,7 +15,7 @@ module Blueprint
     def eval(exp, env = @env)
       if literal?(exp)
         exp
-      elsif exp.is_a?(Symbol)
+      elsif symbol?(exp)
         env[exp]
       elsif exp == []
         []
@@ -64,6 +64,7 @@ module Blueprint
         lambda: -> (exp, env) { Closure.new(exp[1], exp[2], env) },
         list: -> (exp, env) { exp.drop(1).map { |e| eval(e, env) } },
         :"slurp-file" => -> (exp, env) { File.read(eval(exp[1], env)) },
+        quasiquote: -> (exp, env) { expand_quasiquote(exp[1], env) },
         quote: -> (exp, _) { exp[1] },
         read: -> (exp, env) { Parser.new(eval(exp[1], env)).parse },
         rest: -> (exp, env) { evrest(exp, env) },
@@ -98,6 +99,10 @@ module Blueprint
       exp.is_a?(Fixnum) || exp.is_a?(String)
     end
 
+    def symbol?(exp)
+      exp.is_a?(Symbol)
+    end
+
     def macro?(symbol, env)
       env.defined?(symbol) && env[symbol].is_a?(Macro)
     end
@@ -110,6 +115,18 @@ module Blueprint
         ),
         env,
       )
+    end
+
+    def expand_quasiquote(exp, env)
+      if exp == []
+        []
+      elsif literal?(exp) || symbol?(exp)
+        eval([:quote, exp], env)
+      elsif exp[0] == :unquote
+        eval(exp[1], env)
+      else
+        exp.map { |e| expand_quasiquote(e, env) }
+      end
     end
 
     def eval_define(exp, env)

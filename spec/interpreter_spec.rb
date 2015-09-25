@@ -133,4 +133,18 @@ describe Blueprint::Interpreter do
       "(eval '(+ 1 2))"
     ).to eq(3)
   end
+
+  describe "syntactic sugar for macros" do
+    it "expands quasiquoted literals" do
+      expect_eval("`4").to eq(4)
+    end
+
+    it "evaluates and inserts unquoted expressions" do
+      expect_eval("`(,(+ 1 2) 3)").to eq([3, 3])
+    end
+
+    it "handles an unquote right after a quasiquote" do
+      expect_eval("`,(+ 1 2)").to eq(3)
+    end
+  end
 end
