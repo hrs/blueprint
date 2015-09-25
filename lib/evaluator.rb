@@ -124,8 +124,16 @@ module Blueprint
         eval([:quote, exp], env)
       elsif exp[0] == :unquote
         eval(exp[1], env)
+      elsif exp[0] == :"unquote-splicing"
+        raise "can't splice without an enclosing list"
       else
-        exp.map { |e| expand_quasiquote(e, env) }
+        exp.reduce([]) { |acc, e|
+          if e.is_a?(Array) && e[0] == :"unquote-splicing"
+            acc += eval(e[1], env)
+          else
+            acc += [expand_quasiquote(e, env)]
+          end
+        }
       end
     end
 

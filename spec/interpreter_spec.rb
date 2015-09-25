@@ -34,8 +34,8 @@ describe Blueprint::Interpreter do
   it "handles cons" do
     expect_eval("(cons 1 (quote ()))").to eq([1])
     expect_eval("(cons 1 (quote (2 3)))").to eq([1, 2, 3])
-    expect(
-      interpreter.eval("(cons (quote (1 2)) (quote (3 4)))")
+    expect_eval(
+      "(cons (quote (1 2)) (quote (3 4)))"
     ).to eq([[1, 2], 3, 4])
   end
 
@@ -145,6 +145,14 @@ describe Blueprint::Interpreter do
 
     it "handles an unquote right after a quasiquote" do
       expect_eval("`,(+ 1 2)").to eq(3)
+    end
+
+    it "raises an error if we try to splice without an enclosing list" do
+      expect { interpreter.eval("`,@(+ 1 2)") }.to raise_error(StandardError)
+    end
+
+    it "splices into a list" do
+      expect_eval("`(+ ,@(list 1 2))").to eq([:+, 1, 2])
     end
   end
 end

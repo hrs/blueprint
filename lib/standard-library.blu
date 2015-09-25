@@ -7,16 +7,13 @@
           seq))
 
 (defmacro (if condition consequent alternative)
-  (list (quote cond)
-        (list condition consequent)
-        (list (quote else) alternative)))
+  `(cond (,condition ,consequent)
+         (else ,alternative)))
 
 (defmacro (let bindings body)
-  (cons (list (quote lambda)
-              (map (lambda (binding) (first binding))
-                   bindings)
-              body)
-        (map (lambda (binding) (first (rest binding))) bindings)))
+  `((lambda ,(map (lambda (binding) (first binding)) bindings)
+      ,body)
+    ,@(map (lambda (binding) (first (rest binding))) bindings)))
 
 (define (load filename)
   (map (lambda (sexp) (eval sexp))
