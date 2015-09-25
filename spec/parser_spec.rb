@@ -71,5 +71,9 @@ describe Blueprint::Parser do
       expect_parsed_value_of("(cond ((== 1 2) 3) (else 4))").
         to eq([[:cond, [[:==, 1, 2], 3], [:else, 4]]])
     end
+
+    it "handles variadic arguments" do
+      expect_parsed_value_of("(1 2 3 4 . 5)").to eq([[1, 2, 3, 4, :".", 5]])
+    end
   end
 end

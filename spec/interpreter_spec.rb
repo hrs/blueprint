@@ -157,4 +157,21 @@ describe Blueprint::Interpreter do
       expect_eval("`(+ ,@(list 1 2))").to eq([:+, 1, 2])
     end
   end
+
+  describe "variadic binding" do
+    it "binds in lambda definitions" do
+      expect_eval("((lambda (a b . rest) rest) 1 2 3 4 5)").to eq([3, 4, 5])
+    end
+
+    it "binds in function definitions" do
+      expect_eval(
+        "(define (foo a b . rest) rest)" \
+        "(foo 1 2 3 4 5)"
+      ).to eq([3, 4, 5])
+    end
+
+    it "binds when all arguments are variable" do
+      expect_eval("((lambda (. rest) rest) 3 4 5)").to eq([3, 4, 5])
+    end
+  end
 end

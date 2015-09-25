@@ -37,7 +37,7 @@ module Blueprint
       if primitive?(proc)
         apply_primop(proc, args)
       elsif proc.is_a?(Closure)
-        proc.env.push_frame(Frame.new(proc.variables, args))
+        proc.env.push_frame(bind(proc.variables, args))
         eval(
           proc.body,
           proc.env,
@@ -180,9 +180,40 @@ module Blueprint
       end
     end
 
-    def bind(vars, vals, env)
-      env.push_frame(Frame.new(vars, vals))
-      env
+    def bind(vars, vals)
+      groups = binding_groups(vars)
+      if groups.size <= 1
+        Frame.new(vars, vals)
+      elsif groups.size == 2
+        if groups.last.size != 1
+          raise "too many variadic arguments"
+        end
+        variadic_bind(groups[0], groups[1][0], vals)
+      else
+        raise "can't bind more than one variadic group"
+      end
+    end
+
+    def variadic_bind(vars, rest, vals)
+      bindings = vars.zip(vals).reduce({}) do |acc, var, val|
+        acc.merge(var => val)
+      end
+      bindings[rest] = vals.drop(vars.size)
+      Frame.new(bindings.keys, bindings.values)
+    end
+
+    def binding_groups(vars)
+      groups = []
+      current_group = []
+      vars.each do |var|
+        if var == :"."
+          groups << current_group
+          current_group = []
+        else
+          current_group << var
+        end
+      end
+      groups << current_group
     end
 
     def primitive?(op)
