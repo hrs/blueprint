@@ -46,6 +46,15 @@ describe Blueprint::Interpreter do
     end
   end
 
+  describe "let*" do
+    it "evaluates bindings sequentially" do
+      expect_eval(
+        "(let* ((a 2) (b (+ a 1)) (c (+ a b)))" \
+        "  c)"
+      ).to eq(5)
+    end
+  end
+
   describe "load" do
     it "loads and evaluates code from a file" do
       code = "(define (square x) (* x x))"

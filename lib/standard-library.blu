@@ -15,6 +15,12 @@
       ,body)
     ,@(map (lambda (binding) (first (rest binding))) bindings)))
 
+(defmacro (let* bindings body)
+  (if (== bindings '())
+      body
+      `(let (,(first bindings))
+         (let* ,(rest bindings) ,body))))
+
 (define (load filename)
   (map (lambda (sexp) (eval sexp))
        (read (slurp-file filename))))
