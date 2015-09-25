@@ -31,6 +31,11 @@
       (cons (f (first seq))
             (map f (rest seq)))))
 
+(define (not value)
+  (if value
+      false
+      true))
+
 (define (null? exp)
   (== exp (quote ())))
 

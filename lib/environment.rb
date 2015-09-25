@@ -11,7 +11,12 @@ module Blueprint
     end
 
     def [](symbol)
-      lookup(symbol) || raise("symbol \"#{symbol}\" is unbound")
+      frame = lookup_frame_with(symbol)
+      if frame && frame.has_key?(symbol)
+        frame[symbol]
+      else
+        raise("symbol \"#{symbol}\" is unbound")
+      end
     end
 
     def []=(symbol, value)
@@ -53,11 +58,6 @@ module Blueprint
     private
 
     attr_accessor :stack
-
-    def lookup(symbol)
-      frame = lookup_frame_with(symbol)
-      frame && frame[symbol]
-    end
 
     def lookup_frame_with(symbol)
       stack.select { |frame| frame.has_key?(symbol) }.compact.last

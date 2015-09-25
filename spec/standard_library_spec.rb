@@ -25,9 +25,8 @@ describe Blueprint::Interpreter do
 
   describe "if" do
     it "expands into the equivalent cond expression" do
-      expect_eval(
-        "(if (== 1 2) 3 4)"
-      ).to eq(4)
+      expect_eval("(if (== 1 1) 3 4)").to eq(3)
+      expect_eval("(if (== 1 2) 3 4)").to eq(4)
     end
 
     it "doesn't inadvertently execute the alternative branch" do
@@ -79,6 +78,13 @@ describe Blueprint::Interpreter do
       expect_eval(
         "(map (lambda (n) (+ 1 n)) (quote ()))"
       ).to eq([])
+    end
+  end
+
+  describe "not" do
+    it "flips the result of a statement" do
+      expect_eval("(not false)").to eq(true)
+      expect_eval("(not true)").to eq(false)
     end
   end
 
