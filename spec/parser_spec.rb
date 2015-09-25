@@ -42,6 +42,14 @@ describe Blueprint::Parser do
       expect(parser.parse).to eq([:set!])
     end
 
+    it "handles booleans" do
+      parser = Blueprint::Parser.new("true")
+      expect(parser.parse).to eq([true])
+
+      parser = Blueprint::Parser.new("false")
+      expect(parser.parse).to eq([false])
+    end
+
     it "handles empty lists" do
       parser = Blueprint::Parser.new("()")
       expect(parser.parse).to eq([[]])

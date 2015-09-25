@@ -27,6 +27,8 @@ describe Blueprint::Interpreter do
   end
 
   it "handles conditionals" do
+    expect_eval("(cond (true 1) (else 2))").to eq(1)
+    expect_eval("(cond (false 1) (else 2))").to eq(2)
     expect_eval("(cond ((== 1 2) 3) (else 4))").to eq(4)
     expect_eval("(cond ((== 1 1) 3) (else 4))").to eq(3)
   end

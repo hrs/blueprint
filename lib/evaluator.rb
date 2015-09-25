@@ -96,7 +96,10 @@ module Blueprint
     end
 
     def literal?(exp)
-      exp.is_a?(Fixnum) || exp.is_a?(String)
+      exp.is_a?(Fixnum) ||
+        exp.is_a?(String) ||
+        exp == true ||
+        exp == false
     end
 
     def symbol?(exp)

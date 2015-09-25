@@ -20,6 +20,7 @@ module Blueprint
       (
         space? >>
         (
+          boolean |
           atom |
           quote | quasiquote | unquote | unquote_splicing |
           (str("(") >> space? >> str(")")).as(:empty_list) |
@@ -27,6 +28,10 @@ module Blueprint
         ) >>
         space?
       ).as(:sexpr)
+    end
+
+    rule(:boolean) do
+      (str("true") | str("false")).as(:boolean)
     end
 
     rule(:quote) do
@@ -122,6 +127,10 @@ module Blueprint
 
     rule unquote_splicing: subtree(:a) do
       [:"unquote-splicing", a]
+    end
+
+    rule boolean: simple(:bool) do
+      bool == "true"
     end
 
     rule integer: simple(:a) do
