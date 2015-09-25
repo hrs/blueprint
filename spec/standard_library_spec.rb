@@ -28,7 +28,7 @@ describe Blueprint::Interpreter do
   describe "filter" do
     it "can select elements of a list that match a predicate" do
       expect_eval(
-        "(filter (lambda (x) (== x 3)) (list 1 3 4 5 2 3 3 5))"
+        "(filter (lambda (x) (== x 3)) '(1 3 4 5 2 3 3 5))"
       ).to eq([3, 3, 3])
     end
   end
@@ -80,13 +80,13 @@ describe Blueprint::Interpreter do
   describe "map" do
     it "maps a function across a list" do
       expect_eval(
-        "(map (lambda (n) (+ 1 n)) (list 1 2 3))"
+        "(map (lambda (n) (+ 1 n)) '(1 2 3))"
       ).to eq([2, 3, 4])
     end
 
     it "returns an empty list when given one" do
       expect_eval(
-        "(map (lambda (n) (+ 1 n)) (quote ()))"
+        "(map (lambda (n) (+ 1 n)) '())"
       ).to eq([])
     end
   end
@@ -100,11 +100,11 @@ describe Blueprint::Interpreter do
 
   describe "null?" do
     it "returns true when its argument is the empty list" do
-      expect_eval("(null? (quote ()))").to eq(true)
+      expect_eval("(null? '())").to eq(true)
     end
 
     it "returns false otherwise" do
-      expect_eval("(null? (quote (1 2)))").to eq(false)
+      expect_eval("(null? '(1 2))").to eq(false)
     end
   end
 

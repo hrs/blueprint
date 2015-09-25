@@ -34,25 +34,23 @@ describe Blueprint::Interpreter do
   end
 
   it "handles cons" do
-    expect_eval("(cons 1 (quote ()))").to eq([1])
-    expect_eval("(cons 1 (quote (2 3)))").to eq([1, 2, 3])
-    expect_eval(
-      "(cons (quote (1 2)) (quote (3 4)))"
-    ).to eq([[1, 2], 3, 4])
+    expect_eval("(cons 1 '())").to eq([1])
+    expect_eval("(cons 1 '(2 3))").to eq([1, 2, 3])
+    expect_eval("(cons '(1 2) '(3 4))").to eq([[1, 2], 3, 4])
   end
 
   it "handles first" do
-    expect_eval("(first (quote (1 2 3)))").to eq(1)
+    expect_eval("(first '(1 2 3))").to eq(1)
     expect {
-      interpreter.eval("(first (quote ()))")
+      interpreter.eval("(first '())")
     }.to raise_error(StandardError)
   end
 
   it "handles rest" do
-    expect_eval("(rest (quote (1)))").to eq([])
-    expect_eval("(rest (quote (1 2 3 4)))").to eq([2, 3, 4])
+    expect_eval("(rest '(1))").to eq([])
+    expect_eval("(rest '(1 2 3 4))").to eq([2, 3, 4])
     expect {
-      interpreter.eval("(rest (quote ()))")
+      interpreter.eval("(rest '())")
     }.to raise_error(StandardError)
   end
 
@@ -79,7 +77,7 @@ describe Blueprint::Interpreter do
 
   it "handles recursion" do
     expect_eval(
-      "(define (fact n) (cond ((== n 0) 1) (else (* n (fact (- n 1))))))" \
+      "(define (fact n) (if (== n 0) 1 (* n (fact (- n 1)))))" \
       "(fact 6)"
     ).to eq(720)
   end
@@ -87,20 +85,18 @@ describe Blueprint::Interpreter do
   it "supports user-defined macros" do
     expect_eval(
       "(defmacro (my-let bindings body)" \
-      "  (cons (list (quote lambda)" \
-      "              (map (lambda (binding) (first binding))" \
-      "                   bindings)" \
-      "              body)" \
-      "        (map (lambda (x) (first (rest x))) bindings)))" \
-      "(my-let ((a 2) (b 3)) (+ a b))"
+        "`((lambda ,(map (lambda (binding) (first binding)) bindings)" \
+        "    ,body)" \
+        "  ,@(map (lambda (binding) (first (rest binding))) bindings)))" \
+        "(my-let ((a 2) (b 3)) (+ a b))"
     ).to eq(5)
   end
 
   it "supports defining anaphoric macros" do
     expect_eval(
       "(defmacro (aif condition consequent alternative)" \
-      "  (list (quote let) (list (list (quote it) condition))" \
-      "               (list (quote if) (quote it) consequent alternative)))" \
+      "  `(let ((it ,condition))" \
+      "     (if it ,consequent ,alternative)))" \
       "(define (square x) (* x x))" \
       "(aif (+ 1 2 3 4)" \
       "     (square it)" \
