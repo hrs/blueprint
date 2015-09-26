@@ -1,3 +1,4 @@
+require_relative "./binder"
 require_relative "./closure"
 require_relative "./macro"
 
@@ -185,40 +186,7 @@ module Blueprint
     end
 
     def bind(vars, vals, frame)
-      groups = binding_groups(vars)
-      if groups.size <= 1
-        frame.push_with_bindings(vars.zip(vals))
-      elsif groups.size == 2
-        if groups.last.size != 1
-          raise "too many variadic arguments"
-        end
-        bindings = variadic_bind(groups[0], groups[1][0], vals)
-        frame.push_with_bindings(bindings)
-      else
-        raise "can't bind more than one variadic group"
-      end
-    end
-
-    def variadic_bind(vars, rest, vals)
-      bindings = vars.zip(vals).reduce({}) do |acc, var, val|
-        acc.merge(var => val)
-      end
-      bindings[rest] = vals.drop(vars.size)
-      bindings
-    end
-
-    def binding_groups(vars)
-      groups = []
-      current_group = []
-      vars.each do |var|
-        if var == :"."
-          groups << current_group
-          current_group = []
-        else
-          current_group << var
-        end
-      end
-      groups << current_group
+      Binder.new(vars, vals).bind(frame)
     end
 
     def primitive?(op)
