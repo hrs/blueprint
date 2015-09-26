@@ -170,4 +170,18 @@ describe Blueprint::Interpreter do
       expect_eval("((lambda (. rest) rest) 3 4 5)").to eq([3, 4, 5])
     end
   end
+
+  it "handles closures separately" do
+    expect_eval(
+      "(define (make-counter)" \
+      "  (let ((n 0))" \
+      "    (lambda (message)" \
+      "      (set! n (+ 1 n)))))" \
+      "(define a (make-counter))" \
+      "(define b (make-counter))" \
+      "(a)" \
+      "(a)" \
+      "(b)"
+    ).to eq(1)
+  end
 end

@@ -6,27 +6,26 @@ module Blueprint
     PRIMITIVES = [:+, :-, :*, :/, :%, :==]
 
     def initialize
-      @env = Environment.new
-      initialize_primitives
+      @global_frame = Frame.new(initialize_primitives)
       initialize_standard_library
-      @env.push_frame
+      @global_frame = Frame.new(@global_frame)
     end
 
-    def eval(exp, env = @env)
+    def eval(exp, frame = @global_frame)
       if literal?(exp)
         exp
       elsif symbol?(exp)
-        env[exp]
+        frame.lookup(exp)
       elsif exp == []
         []
       elsif special_form?(exp.first)
-        special_forms[exp.first].call(exp, env)
-      elsif macro?(exp.first, env)
-        eval_macro(exp, env)
+        special_forms[exp.first].call(exp, frame)
+      elsif macro?(exp.first, frame)
+        eval_macro(exp, frame)
       else
         apply(
-          eval(exp.first, env),
-          exp.drop(1).map { |arg| eval(arg, env) },
+          eval(exp.first, frame),
+          exp.drop(1).map { |arg| eval(arg, frame) },
         )
       end
     end
@@ -37,10 +36,9 @@ module Blueprint
       if primitive?(proc)
         apply_primop(proc, args)
       elsif proc.is_a?(Closure)
-        proc.env.push_frame(bind(proc.variables, args))
         eval(
           proc.body,
-          proc.env,
+          bind(proc.variables, args, proc.frame),
         )
       else
         raise "\"#{proc}\" isn't applicable."
@@ -49,26 +47,27 @@ module Blueprint
 
     def special_forms
       {
-        apply: -> (exp, env) {
+        apply: -> (exp, frame) {
           apply(
-            eval(exp[1], env),
-            eval(exp[2], env),
+            eval(exp[1], frame),
+            eval(exp[2], frame),
           )
         },
-        cond: -> (exp, env) { evcond(exp.drop(1), env) },
-        cons: -> (exp, env) { [eval(exp[1], env), *eval(exp[2], env)] },
-        define: -> (exp, env) { eval_define(exp, env) },
-        defmacro: -> (exp, env) { defmacro(exp, env) },
-        eval: -> (exp, env) { eval(eval(exp[1], env), env) },
-        first: -> (exp, env) { evfirst(exp, env) },
-        lambda: -> (exp, env) { Closure.new(exp[1], exp[2], env) },
-        list: -> (exp, env) { exp.drop(1).map { |e| eval(e, env) } },
-        :"slurp-file" => -> (exp, env) { File.read(eval(exp[1], env)) },
-        quasiquote: -> (exp, env) { expand_quasiquote(exp[1], env) },
+        cond: -> (exp, frame) { evcond(exp.drop(1), frame) },
+        cons: -> (exp, frame) { [eval(exp[1], frame), *eval(exp[2], frame)] },
+        define: -> (exp, frame) { eval_define(exp, frame) },
+        defmacro: -> (exp, frame) { defmacro(exp, frame) },
+        eval: -> (exp, frame) { eval(eval(exp[1], frame), frame) },
+        first: -> (exp, frame) { evfirst(exp, frame) },
+        lambda: -> (exp, frame) { Closure.new(exp[1], exp[2], frame) },
+        list: -> (exp, frame) { exp.drop(1).map { |e| eval(e, frame) } },
+        load: -> (exp, frame) { Interpreter.new.load_file(exp[1], self) },
+        :"slurp-file" => -> (exp, frame) { File.read(eval(exp[1], frame)) },
+        quasiquote: -> (exp, frame) { expand_quasiquote(exp[1], frame) },
         quote: -> (exp, _) { exp[1] },
-        read: -> (exp, env) { Parser.new(eval(exp[1], env)).parse },
-        rest: -> (exp, env) { evrest(exp, env) },
-        set!: -> (exp, env) { env.set!(exp[1], eval(exp[2], env)) },
+        read: -> (exp, frame) { Parser.new(eval(exp[1], frame)).parse },
+        rest: -> (exp, frame) { evrest(exp, frame) },
+        set!: -> (exp, frame) { frame.set!(exp[1], eval(exp[2], frame)) },
       }
     end
 
@@ -76,15 +75,20 @@ module Blueprint
       special_forms.has_key?(symbol)
     end
 
-    def defmacro(exp, env)
-      env[exp[1][0]] = Macro.new(
-        exp[1].drop(1),
-        exp[2],
+    def defmacro(exp, frame)
+      frame.define(
+        exp[1][0],
+        Macro.new(
+          exp[1].drop(1),
+          exp[2],
+        )
       )
     end
 
     def initialize_primitives
-      @env.push_frame(Frame.new(PRIMITIVES, PRIMITIVES))
+      Frame.new.push_with_bindings(
+        PRIMITIVES.zip(PRIMITIVES)
+      )
     end
 
     def standard_library_file
@@ -106,62 +110,62 @@ module Blueprint
       exp.is_a?(Symbol)
     end
 
-    def macro?(symbol, env)
-      env.defined?(symbol) && env[symbol].is_a?(Macro)
+    def macro?(symbol, frame)
+      frame.defined?(symbol) && frame.lookup(symbol).is_a?(Macro)
     end
 
-    def eval_macro(exp, env)
+    def eval_macro(exp, frame)
       eval(
         apply(
-          env[exp.first].expand(exp.drop(1), env),
+          frame.lookup(exp.first).expand(exp.drop(1), frame),
           [],
         ),
-        env,
+        frame,
       )
     end
 
-    def expand_quasiquote(exp, env)
+    def expand_quasiquote(exp, frame)
       if exp == []
         []
       elsif literal?(exp) || symbol?(exp)
-        eval([:quote, exp], env)
+        eval([:quote, exp], frame)
       elsif exp[0] == :unquote
-        eval(exp[1], env)
+        eval(exp[1], frame)
       elsif exp[0] == :"unquote-splicing"
         raise "can't splice without an enclosing list"
       else
         exp.reduce([]) { |acc, e|
           if e.is_a?(Array) && e[0] == :"unquote-splicing"
-            acc += eval(e[1], env)
+            acc += eval(e[1], frame)
           else
-            acc += [expand_quasiquote(e, env)]
+            acc += [expand_quasiquote(e, frame)]
           end
         }
       end
     end
 
-    def eval_define(exp, env)
+    def eval_define(exp, frame)
       if exp[1].is_a?(Array)
-        env[exp[1].first] = Closure.new(exp[1].drop(1), exp[2], env)
+        frame.define(exp[1].first, Closure.new(exp[1].drop(1), exp[2], frame))
       else
-        env[exp[1]] = eval(exp[2], env)
+        frame.define(exp[1], eval(exp[2], frame))
       end
     end
 
-    def evcond(clauses, env)
+    def evcond(clauses, frame)
       true_clause = clauses.find { |clause|
-        clause[0] == :else || eval(clause[0], env)
+        clause[0] == :else || eval(clause[0], frame)
       }
 
       if true_clause
-        eval(true_clause[1], env)
+        eval(true_clause[1], frame)
       else
         []
       end
     end
 
-    def evfirst(exp, env)
-      result = eval(exp[1], env)
+    def evfirst(exp, frame)
+      result = eval(exp[1], frame)
 
       if result.respond_to?(:size) && result.size > 0
         result.first
@@ -170,8 +174,8 @@ module Blueprint
       end
     end
 
-    def evrest(exp, env)
-      result = eval(exp[1], env)
+    def evrest(exp, frame)
+      result = eval(exp[1], frame)
 
       if result.respond_to?(:size) && result.size > 0
         result.drop(1)
@@ -180,15 +184,16 @@ module Blueprint
       end
     end
 
-    def bind(vars, vals)
+    def bind(vars, vals, frame)
       groups = binding_groups(vars)
       if groups.size <= 1
-        Frame.new(vars, vals)
+        frame.push_with_bindings(vars.zip(vals))
       elsif groups.size == 2
         if groups.last.size != 1
           raise "too many variadic arguments"
         end
-        variadic_bind(groups[0], groups[1][0], vals)
+        bindings = variadic_bind(groups[0], groups[1][0], vals)
+        frame.push_with_bindings(bindings)
       else
         raise "can't bind more than one variadic group"
       end
@@ -199,7 +204,7 @@ module Blueprint
         acc.merge(var => val)
       end
       bindings[rest] = vals.drop(vars.size)
-      Frame.new(bindings.keys, bindings.values)
+      bindings
     end
 
     def binding_groups(vars)

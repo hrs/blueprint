@@ -9,8 +9,8 @@ module Blueprint
         last
     end
 
-    def load_file(filename, evaluater = evaluator)
-      eval(File.read(filename), evaluater)
+    def load_file(filename, evaluator = evaluator)
+      eval(File.read(filename), evaluator)
     end
 
     private

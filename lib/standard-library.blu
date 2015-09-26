@@ -27,10 +27,6 @@
       `(let (,(first bindings))
          (let* ,(rest bindings) ,body))))
 
-(define (load filename)
-  (map (lambda (sexp) (eval sexp))
-       (read (slurp-file filename))))
-
 (define (map f seq)
   (if (null? seq)
       (quote ())
