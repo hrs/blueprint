@@ -175,7 +175,7 @@ describe Blueprint::Interpreter do
     expect_eval(
       "(define (make-counter)" \
       "  (let ((n 0))" \
-      "    (lambda (message)" \
+      "    (lambda ()" \
       "      (set! n (+ 1 n)))))" \
       "(define a (make-counter))" \
       "(define b (make-counter))" \
