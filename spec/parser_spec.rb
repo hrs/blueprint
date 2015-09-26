@@ -6,6 +6,16 @@ describe Blueprint::Parser do
       expect(Blueprint::Parser.new(expression).parse)
     end
 
+    it "strips comments and doesn't interfere with strings" do
+      expect_parsed_value_of(
+        "(1 2 # foo bar \n 3 4)"
+      ).to eq([[1, 2, 3, 4]])
+
+      expect_parsed_value_of(
+        "(1 2 \"# foo bar \n\" 3 4)"
+      ).to eq([[1, 2, "# foo bar \n", 3, 4]])
+    end
+
     it "handle integers" do
       expect_parsed_value_of("123").to eq([123])
     end

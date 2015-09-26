@@ -20,6 +20,8 @@ module Blueprint
     rule(:sexpr) do
       (
         space? >>
+        comment.maybe >>
+        space? >>
         (
           boolean |
           atom |
@@ -29,6 +31,10 @@ module Blueprint
         ) >>
         space?
       ).as(:sexpr)
+    end
+
+    rule(:comment) do
+      str("#") >> match(/[^\n]/).repeat >> str("\n")
     end
 
     rule(:boolean) do
@@ -88,7 +94,7 @@ module Blueprint
     end
 
     rule(:symbol) do
-      match(/[a-z]|\-|\+|\*|\/|\#|\=|\!|\?|\%|\./).repeat(1).as(:symbol)
+      match(/[a-z]|\-|\+|\*|\/|\=|\!|\?|\%|\./).repeat(1).as(:symbol)
     end
 
     rule(:string) do
