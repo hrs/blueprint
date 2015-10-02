@@ -102,7 +102,7 @@ module Blueprint
         (
           str('\\') >> any |
           str('"').absent? >> any
-        ).repeat.as(:string) >>
+        ).repeat.maybe.as(:string) >>
         str('"')
     end
 

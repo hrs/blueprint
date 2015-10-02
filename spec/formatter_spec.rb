@@ -10,13 +10,20 @@ describe Blueprint::Formatter do
       expect_formatting_for(5).to eq("5")
       expect_formatting_for(5.0).to eq("5.0")
       expect_formatting_for(:foo).to eq("foo")
-      expect_formatting_for("foo").to eq("\"foo\"")
+    end
+
+    it "can quote strings, or not" do
+      expect(Blueprint::Formatter.new("foo").format).to eq("foo")
+      expect(Blueprint::Formatter.new("foo", quote_strings: true).format).
+        to eq("\"foo\"")
     end
 
     it "formats lists" do
       expect_formatting_for([]).to eq("()")
-      expect_formatting_for([1, :foo, "foo"]).to eq("(1 foo \"foo\")")
       expect_formatting_for([1, [2, 3], 4]).to eq("(1 (2 3) 4)")
+      expect(
+        Blueprint::Formatter.new([1, :foo, "foo"], quote_strings: true).format
+      ).to eq("(1 foo \"foo\")")
     end
 
     it "handles quotes" do

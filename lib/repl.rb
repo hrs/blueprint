@@ -7,7 +7,7 @@ module Blueprint
     def exec
       print "> "
       while input = gets
-        puts Formatter.new(interpreter.eval(input)).format
+        puts Formatter.new(interpreter.eval(input), quote_strings: true).format
         print "> "
       end
       puts

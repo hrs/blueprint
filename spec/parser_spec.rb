@@ -29,6 +29,7 @@ describe Blueprint::Parser do
     end
 
     it "handle strings" do
+      expect_parsed_value_of("\"\"").to eq([""])
       expect_parsed_value_of("\"abc\"").to eq(["abc"])
     end
 

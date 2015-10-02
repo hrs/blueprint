@@ -11,6 +11,14 @@ describe Blueprint::Interpreter do
     end
   end
 
+  describe "concatenate" do
+    it "appends its arguments together into a string" do
+      expect_eval(
+        "(concatenate 1 \" foo \" '(1 2))"
+      ).to eq("1 foo (1 2)")
+    end
+  end
+
   describe "even?" do
     it "returns true if a number is even" do
       expect_eval(

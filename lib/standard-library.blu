@@ -4,6 +4,11 @@
    ((not (first args)) false)
    (else (apply and (rest args)))))
 
+(define (concatenate . args)
+  (reduce (lambda (arg acc) (+ acc (->string arg)))
+          ""
+          args))
+
 (define (even? n)
   (== (% n 2) 0))
 

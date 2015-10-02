@@ -3,8 +3,9 @@ require_relative "./macro"
 
 module Blueprint
   class Formatter
-    def initialize(expression)
+    def initialize(expression, quote_strings: false)
       @expression = expression
+      @quote_strings = quote_strings
     end
 
     def format
@@ -16,7 +17,11 @@ module Blueprint
       when Macro
         format_as_macro
       when String
-        "\"#{expression}\""
+        if quote_strings?
+          "\"#{expression}\""
+        else
+          expression
+        end
       else
         expression.to_s
       end
@@ -24,32 +29,40 @@ module Blueprint
 
     private
 
+    attr_reader :expression
+
+    def quote_strings?
+      @quote_strings
+    end
+
     def format_as_list
       if expression.first == :quote
-        "'#{self.class.new(expression.last).format}"
+        "'#{subformat(expression.last)}"
       elsif expression.first == :quasiquote
-        "`#{self.class.new(expression.last).format}"
+        "`#{subformat(expression.last)}"
       elsif expression.first == :unquote
-        ",#{self.class.new(expression.last).format}"
+        ",#{subformat(expression.last)}"
       elsif expression.first == :"unquote-splicing"
-        ",@#{self.class.new(expression.last).format}"
+        ",@#{subformat(expression.last)}"
       else
-        "(#{expression.map { |elt| self.class.new(elt).format }.join(" ")})"
+        "(#{expression.map { |elt| subformat(elt)}.join(" ")})"
       end
     end
 
     def format_as_closure
       "#<lambda " +
-        self.class.new(expression.variables).format +
+        subformat(expression.variables) +
         ">"
     end
 
     def format_as_macro
       "#<macro " +
-        self.class.new(expression.variables).format +
+        subformat(expression.variables) +
         ">"
     end
 
-    attr_reader :expression
+    def subformat(str)
+      self.class.new(str, quote_strings: quote_strings?).format
+    end
   end
 end
