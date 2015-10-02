@@ -76,6 +76,16 @@ makes writing macros fairly convenient:
        ,alternative))
 ```
 
+One of Blueprint's goals is to make everything `apply`able, including
+macros:
+
+```scheme
+(defmacro (adder x)
+  `(+ 1 ,x))
+
+(map adder '(1 2 3)) # => `(2 3 4)
+```
+
 ### Tests
 
 Blueprint's test coverage is pretty good. To run the tests:
