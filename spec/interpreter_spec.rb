@@ -214,4 +214,11 @@ describe Blueprint::Interpreter do
       interpreter.eval("(display \"hello world!\n\")")
     }.to output("hello world!\n").to_stdout
   end
+
+  it "converts objects to formatted strings" do
+    expect_eval("(->string 4)").to eq("4")
+    expect_eval("(->string 4.0)").to eq("4.0")
+    expect_eval("(->string '(1 (2) 3))").to eq("(1 (2) 3)")
+    expect_eval("(->string (lambda (x) (* x x)))").to eq("#<lambda (x)>")
+  end
 end

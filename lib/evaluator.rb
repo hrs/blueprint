@@ -48,6 +48,9 @@ module Blueprint
 
     def special_forms
       {
+        :"->string" => -> (exp, frame) {
+          Formatter.new(eval(exp[1], frame)).format
+        },
         apply: -> (exp, frame) {
           apply(
             eval(exp[1], frame),
@@ -104,6 +107,7 @@ module Blueprint
 
     def literal?(exp)
       exp.is_a?(Fixnum) ||
+        exp.is_a?(Float) ||
         exp.is_a?(String) ||
         exp == true ||
         exp == false
