@@ -16,6 +16,11 @@
   `(cond (,condition ,consequent)
          (else ,alternative)))
 
+(define (last seq)
+  (cond ((null? seq) '())
+        ((null? (rest seq)) (first seq))
+        (else (last (rest seq)))))
+
 (defmacro (let bindings body)
   `((lambda ,(map (lambda (binding) (first binding)) bindings)
       ,body)
@@ -48,6 +53,9 @@
   (cond ((null? args) false)
         ((first args) true)
         (else (apply or (rest args)))))
+
+(define (prog . expressions)
+  (last expressions))
 
 (define (reduce f acc seq)
   (if (null? seq)

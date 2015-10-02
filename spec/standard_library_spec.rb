@@ -47,6 +47,20 @@ describe Blueprint::Interpreter do
     end
   end
 
+  describe "last" do
+    it "returns the last element in a list" do
+      expect_eval(
+        "(last '(1 2 3 4 5))"
+      ).to eq(5)
+    end
+
+    it "returns the empty list if the list is empty" do
+      expect_eval(
+        "(last '())"
+      ).to eq([])
+    end
+  end
+
   describe "let" do
     it "expands into an equivalent lambda expression" do
       expect_eval(
@@ -116,6 +130,18 @@ describe Blueprint::Interpreter do
 
     it "returns false if all arguments are falsy" do
       expect_eval("(or false false 2)").to eq(true)
+    end
+  end
+
+  describe "prog" do
+    it "evaluates multiple statements, returning the last" do
+      expect_eval(
+        "(define x 2)" \
+        "(prog" \
+        "  (set! x 3)" \
+        "  (set! x (* x x))" \
+        "  x)"
+      ).to eq(9)
     end
   end
 
