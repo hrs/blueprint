@@ -64,19 +64,6 @@ describe Blueprint::Interpreter do
     end
   end
 
-  describe "load" do
-    it "loads and evaluates code from a file" do
-      code = "(define (square x) (* x x))"
-      allow(File).to receive(:read).and_call_original
-      allow(File).to receive(:read).with("square.blu").and_return(code)
-
-      expect_eval(
-        "(load \"square.blu\")" \
-        "(square 3)"
-      ).to eq(9)
-    end
-  end
-
   describe "map" do
     it "maps a function across a list" do
       expect_eval(

@@ -114,6 +114,17 @@ describe Blueprint::Interpreter do
     ).to eq(contents)
   end
 
+  it "loads and evaluates code from a file" do
+    code = "(define (square x) (* x x))"
+    allow(File).to receive(:read).and_call_original
+    allow(File).to receive(:read).with("square.blu").and_return(code)
+
+    expect_eval(
+      "(load \"square.blu\")" \
+      "(square 3)"
+    ).to eq(9)
+  end
+
   it "can read ASTs from strings" do
     expect_eval(
       "(read \"(+ 1 2 3)\")"
