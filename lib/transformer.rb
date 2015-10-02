@@ -43,7 +43,13 @@ module Blueprint
     end
 
     rule string: simple(:s) do
-      s.to_s
+      escapes = {
+        "\\n" => "\n",
+        "\\r" => "\r",
+        "\\t" => "\t",
+      }
+
+      s.to_s.gsub(/(\\[nrt])/) { escapes[$1] }
     end
 
     rule empty_list: simple(:a) do

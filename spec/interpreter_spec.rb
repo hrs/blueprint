@@ -208,4 +208,10 @@ describe Blueprint::Interpreter do
       expect(e.status).to eq exit_code
     end
   end
+
+  it "writes to stdout" do
+    expect {
+      interpreter.eval("(display \"hello world!\n\")")
+    }.to output("hello world!\n").to_stdout
+  end
 end
