@@ -9,6 +9,8 @@
           ""
           args))
 
+(define dolist map)
+
 (define (even? n)
   (== (% n 2) 0))
 
