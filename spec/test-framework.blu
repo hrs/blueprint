@@ -1,0 +1,25 @@
+(define pending-tests '())
+
+(define (make-test condition)
+  (lambda ()
+    (eval condition)))
+
+(define (assert-equal a b)
+  (if (== a b)
+      (display ".")
+      (prog
+       (display "F\n")
+       (display a)
+       (display " and ")
+       (display b)
+       (display " aren't equal!\n")
+       (exit 1))))
+
+(define (deftest docstring test)
+  (set! pending-tests
+    (cons (make-test test) pending-tests)))
+
+(define (run-tests)
+  (prog
+   (map (lambda (test) (test)) pending-tests)
+   (display "\nDone. Lookin' fine!\n")))
