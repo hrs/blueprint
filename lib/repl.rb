@@ -1,30 +1,19 @@
 require_relative "parser"
 require_relative "evaluator"
+require_relative "formatter"
 
 module Blueprint
   class Repl
     def exec
       print "> "
       while input = gets
-        puts format(interpreter.eval(input))
+        puts Formatter.new(interpreter.eval(input)).format
         print "> "
       end
       puts
     end
 
     private
-
-    def format(expr)
-      if expr.is_a?(Array)
-        "(#{expr.map { |elt| format(elt) }.join(" ")})"
-      elsif expr.is_a?(Closure)
-        "#<lambda #{format(expr.variables)} -> #{format(expr.body)}>"
-      elsif expr.is_a?(Macro)
-        "#<macro #{format(expr.variables)} -> #{format(expr.body)}>"
-      else
-        expr.to_s
-      end
-    end
 
     def interpreter
       @_interpreter ||= Interpreter.new
