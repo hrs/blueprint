@@ -195,4 +195,17 @@ describe Blueprint::Interpreter do
       "(b)"
     ).to eq(1)
   end
+
+  it "supports custom exit codes" do
+    exit_code = 3
+    exit_expression = "(exit #{exit_code})"
+
+    expect { interpreter.eval(exit_expression) }.to raise_error(SystemExit)
+
+    begin
+      interpreter.eval(exit_expression)
+    rescue SystemExit => e
+      expect(e.status).to eq exit_code
+    end
+  end
 end

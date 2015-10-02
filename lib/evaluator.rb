@@ -58,6 +58,7 @@ module Blueprint
         cons: -> (exp, frame) { [eval(exp[1], frame), *eval(exp[2], frame)] },
         define: -> (exp, frame) { eval_define(exp, frame) },
         defmacro: -> (exp, frame) { defmacro(exp, frame) },
+        exit: -> (exp, frame) { exit(eval(exp[1], frame)) },
         eval: -> (exp, frame) { eval(eval(exp[1], frame), frame) },
         first: -> (exp, frame) { evfirst(exp, frame) },
         lambda: -> (exp, frame) { Closure.new(exp[1], exp[2], frame) },
