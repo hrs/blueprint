@@ -133,7 +133,7 @@ describe Blueprint::Interpreter do
 
   it "can apply a function to a list" do
     expect_eval(
-      "(apply '+ '(1 2))"
+      "(apply + '(1 2))"
     ).to eq(3)
   end
 
@@ -220,5 +220,11 @@ describe Blueprint::Interpreter do
     expect_eval("(->string 4.0)").to eq("4.0")
     expect_eval("(->string '(1 (2) 3))").to eq("(1 (2) 3)")
     expect_eval("(->string (lambda (x) (* x x)))").to eq("#<lambda (x)>")
+  end
+
+  it "has applicable special forms" do
+    expect_eval(
+      "(apply first '(1 2 3 4))"
+    ).to eq(1)
   end
 end

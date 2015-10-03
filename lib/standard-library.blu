@@ -27,7 +27,7 @@
         (else (last (rest seq)))))
 
 (defmacro (let bindings body)
-  `((lambda ,(map (lambda (binding) (first binding)) bindings)
+  `((lambda ,(map first bindings)
       ,body)
     ,@(map (lambda (binding) (first (rest binding))) bindings)))
 

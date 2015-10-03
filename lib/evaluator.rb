@@ -1,13 +1,16 @@
 require_relative "./binder"
 require_relative "./closure"
 require_relative "./macro"
+require_relative "./special_form"
 
 module Blueprint
   class Evaluator
     PRIMITIVES = [:+, :-, :*, :/, :%, :==]
 
     def initialize
-      @global_frame = Frame.new(initialize_primitives)
+      @global_frame = Frame.new(
+        initialize_primitives.push_with_bindings(special_forms)
+      )
       initialize_standard_library
       @global_frame = Frame.new(@global_frame)
     end
@@ -19,15 +22,18 @@ module Blueprint
         frame.lookup(exp)
       elsif exp == []
         []
-      elsif special_form?(exp.first)
-        special_forms[exp.first].call(exp, frame)
       elsif macro?(exp.first, frame)
         eval_macro(exp, frame)
       else
-        apply(
-          eval(exp.first, frame),
-          exp.drop(1).map { |arg| eval(arg, frame) },
-        )
+        applicable = eval(exp.first, frame)
+        if special_form?(applicable)
+          apply_special_form(applicable, exp, frame)
+        else
+          apply(
+            applicable,
+            exp.drop(1).map { |arg| eval(arg, frame) },
+          )
+        end
       end
     end
 
@@ -46,39 +52,62 @@ module Blueprint
       end
     end
 
-    def special_forms
-      {
-        :"->string" => -> (exp, frame) {
-          Formatter.new(eval(exp[1], frame)).format
-        },
-        apply: -> (exp, frame) {
-          apply(
-            eval(exp[1], frame),
-            eval(exp[2], frame),
-          )
-        },
-        cond: -> (exp, frame) { evcond(exp.drop(1), frame) },
-        cons: -> (exp, frame) { [eval(exp[1], frame), *eval(exp[2], frame)] },
-        define: -> (exp, frame) { eval_define(exp, frame) },
-        defmacro: -> (exp, frame) { defmacro(exp, frame) },
-        display: -> (exp, frame) { print(eval(exp[1], frame)) },
-        exit: -> (exp, frame) { exit(eval(exp[1], frame)) },
-        eval: -> (exp, frame) { eval(eval(exp[1], frame), frame) },
-        first: -> (exp, frame) { evfirst(exp, frame) },
-        lambda: -> (exp, frame) { Closure.new(exp[1], exp[2], frame) },
-        list: -> (exp, frame) { exp.drop(1).map { |e| eval(e, frame) } },
-        load: -> (exp, frame) { Interpreter.new.load_file(exp[1], self) },
-        :"slurp-file" => -> (exp, frame) { File.read(eval(exp[1], frame)) },
-        quasiquote: -> (exp, frame) { expand_quasiquote(exp[1], frame) },
-        quote: -> (exp, _) { exp[1] },
-        read: -> (exp, frame) { Parser.new(eval(exp[1], frame)).parse },
-        rest: -> (exp, frame) { evrest(exp, frame) },
-        set!: -> (exp, frame) { frame.set!(exp[1], eval(exp[2], frame)) },
-      }
+    def apply_special_form(form, exp, frame)
+      form.call(exp, frame)
     end
 
-    def special_form?(symbol)
-      special_forms.has_key?(symbol)
+    def special_forms
+      {
+        :"->string" =>
+          SpecialForm.new { |exp, frame|
+            Formatter.new(eval(exp[1], frame)).format
+          },
+        apply:
+          SpecialForm.new { |exp, frame|
+            applicable = eval(exp[1], frame)
+            if special_form?(applicable)
+              apply_special_form(applicable, exp.drop(1), frame)
+            else
+              apply(applicable, eval(exp[2], frame))
+            end
+          },
+        cond:
+          SpecialForm.new { |exp, frame| evcond(exp.drop(1), frame) },
+        cons:
+          SpecialForm.new { |exp, frame| [eval(exp[1], frame), *eval(exp[2], frame)] },
+        define:
+          SpecialForm.new { |exp, frame| eval_define(exp, frame) },
+        defmacro:
+          SpecialForm.new { |exp, frame| defmacro(exp, frame) },
+        display:
+          SpecialForm.new { |exp, frame| print(eval(exp[1], frame)) },
+        exit:
+          SpecialForm.new { |exp, frame| exit(eval(exp[1], frame)) },
+        eval:
+          SpecialForm.new { |exp, frame| eval(eval(exp[1], frame), frame) },
+        first:
+          SpecialForm.new { |exp, frame| evfirst(exp, frame) },
+        lambda:
+          SpecialForm.new { |exp, frame|
+            Closure.new(exp[1], exp[2], frame)
+          },
+        list:
+          SpecialForm.new { |exp, frame| exp.drop(1).map { |e| eval(e, frame) } },
+        load:
+          SpecialForm.new { |exp, frame| Interpreter.new.load_file(exp[1], self) },
+        :"slurp-file" =>
+          SpecialForm.new { |exp, frame| File.read(eval(exp[1], frame)) },
+        quasiquote:
+          SpecialForm.new { |exp, frame| expand_quasiquote(exp[1], frame) },
+        quote:
+          SpecialForm.new { |exp, _| exp[1] },
+        read:
+          SpecialForm.new { |exp, frame| Parser.new(eval(exp[1], frame)).parse },
+        rest:
+          SpecialForm.new { |exp, frame| evrest(exp, frame) },
+        set!:
+          SpecialForm.new { |exp, frame| frame.set!(exp[1], eval(exp[2], frame)) },
+      }
     end
 
     def defmacro(exp, frame)
@@ -115,6 +144,10 @@ module Blueprint
 
     def symbol?(exp)
       exp.is_a?(Symbol)
+    end
+
+    def special_form?(exp)
+      exp.is_a?(SpecialForm)
     end
 
     def macro?(symbol, frame)
