@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/blueprint"
+
+input = ""
+
+while line = gets
+  input << line
+end
+
+Blueprint::Interpreter.new.eval(input)

@@ -9,8 +9,6 @@
           ""
           args))
 
-(define dolist map)
-
 (define (even? n)
   (== (% n 2) 0))
 
@@ -44,6 +42,8 @@
       (quote ())
       (cons (f (first seq))
             (map f (rest seq)))))
+
+(define dolist map)
 
 (define (not value)
   (if value

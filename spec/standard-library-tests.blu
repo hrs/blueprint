@@ -1,4 +1,4 @@
-(load "test-framework.blu")
+(load "lib/test-framework.blu")
 
 (deftest
   "and returns true if all arguments are truthy"
@@ -9,6 +9,11 @@
   "and returns false if any arguments are falsy"
   '(assert-equal (and 1 false "foo")
                  false))
+
+(deftest
+  "concatenate appends its arguments together into a string"
+  '(assert-equal (concatenate 1 " foo " '(1 2))
+                 "1 foo (1 2)"))
 
 (deftest
   "even? returns true if a number is even"

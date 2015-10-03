@@ -8,11 +8,7 @@
   (if (== a b)
       (display ".")
       (prog
-       (display "F\n")
-       (display a)
-       (display " and ")
-       (display b)
-       (display " aren't equal!\n")
+       (display (concatenate "F\n" a " and " b " aren't equal!\n"))
        (exit 1))))
 
 (define (deftest docstring test)
@@ -21,5 +17,5 @@
 
 (define (run-tests)
   (prog
-   (map (lambda (test) (test)) pending-tests)
+   (dolist (lambda (test) (test)) pending-tests)
    (display "\nDone. Lookin' fine!\n")))
