@@ -1,6 +1,6 @@
 ### Blueprint [![Build Status](https://secure.travis-ci.org/hrs/blueprint.png?branch=master&.png)](http://travis-ci.org/hrs/blueprint)
 
-A simple little Scheme implemented in Ruby.
+A simple little Scheme-derived language implemented in Ruby.
 
 Blueprint is still very tiny, missing a ton of functionality, and has
 absolutely atrocious performance. This is all just for fun.
@@ -14,7 +14,7 @@ $ bin/run_repl
 >
 ```
 
-(Consider using [rlwrap] for readline functionality---use `rlwrap
+(Consider using [rlwrap] for readline functionality--use `rlwrap
 bin/run_repl`)
 
 [rlwrap]: https://github.com/hanslub42/rlwrap
@@ -76,6 +76,9 @@ makes writing macros fairly convenient:
        ,alternative))
 ```
 
+Blueprint *doesn't* yet have a `gensym` facility, though, so watch out
+for variable capture! That should be [coming shortly].
+
 One of Blueprint's goals is to make everything `apply`able, including
 macros:
 
@@ -83,13 +86,31 @@ macros:
 (defmacro (adder x)
   `(+ 1 ,x))
 
-(map adder '(1 2 3)) # => `(2 3 4)
+(map adder '(1 2 3)) # => '(2 3 4)
 ```
+
+In fact, even special forms like `first`, `load`, and `quote` are
+first-class, applicable objects:
+
+```scheme
+(map first '((1 2) (3 4))) # => '(1 3)
+```
+
+Blueprint has a [standard library] that defines some basic functions
+and macros, including `let`, `let*`, `if`, `map`, `reduce`, `filter`,
+`concatenate`, *and more*.
+
+[coming shortly]: https://github.com/hrs/blueprint/issues/22
+[standard library]: https://github.com/hrs/blueprint/blob/master/lib/standard-library.blu
 
 ### Tests
 
-Blueprint's test coverage is pretty good. To run the tests:
+Blueprint's test coverage is pretty good. The tests for the
+interpreter are written in RSpec, while the tests for the standard
+library are written in Blueprint itself.
+
+To run all of the tests:
 
 ```sh
-$ rspec
+$ rake
 ```
