@@ -60,59 +60,118 @@ module Blueprint
 
     def special_forms
       {
-        :"->string" =>
-          SpecialForm.new { |exp, frame|
-            Formatter.new(eval(exp[1], frame)).format
-          },
-        apply:
-          SpecialForm.new { |exp, frame|
-            applicable = eval(exp[1], frame)
-            if special_form?(applicable)
-              apply_special_form(applicable, exp.drop(1), frame)
-            else
-              apply(applicable, eval(exp[2], frame))
-            end
-          },
-        cond:
-          SpecialForm.new { |exp, frame| evcond(exp.drop(1), frame) },
-        cons:
-          SpecialForm.new { |exp, frame| [eval(exp[1], frame), *eval(exp[2], frame)] },
-        define:
-          SpecialForm.new { |exp, frame| eval_define(exp, frame) },
-        defmacro:
-          SpecialForm.new { |exp, frame| defmacro(exp, frame) },
-        display:
-          SpecialForm.new { |exp, frame| print(eval(exp[1], frame)) },
-        exit:
-          SpecialForm.new { |exp, frame| exit(eval(exp[1], frame)) },
-        eval:
-          SpecialForm.new { |exp, frame| eval(eval(exp[1], frame), frame) },
-        first:
-          SpecialForm.new { |exp, frame| evfirst(exp, frame) },
-        lambda:
-          SpecialForm.new { |exp, frame|
-            Closure.new(exp[1], exp[2], frame)
-          },
-        list:
-          SpecialForm.new { |exp, frame| exp.drop(1).map { |e| eval(e, frame) } },
-        load:
-          SpecialForm.new { |exp, frame| Interpreter.new.load_file(exp[1], self) },
-        :"slurp-file" =>
-          SpecialForm.new { |exp, frame| File.read(eval(exp[1], frame)) },
-        quasiquote:
-          SpecialForm.new { |exp, frame| expand_quasiquote(exp[1], frame) },
-        quote:
-          SpecialForm.new { |exp, _| exp[1] },
-        read:
-          SpecialForm.new { |exp, frame| Parser.new(eval(exp[1], frame)).parse },
-        rest:
-          SpecialForm.new { |exp, frame| evrest(exp, frame) },
-        set!:
-          SpecialForm.new { |exp, frame| frame.set!(exp[1], eval(exp[2], frame)) },
+        :"->string" => to_string,
+        apply: my_apply,
+        cond: cond,
+        cons: cons,
+        define: define,
+        defmacro: defmacro,
+        display: display,
+        exit: my_exit,
+        eval: my_eval,
+        first: first,
+        lambda: lambda,
+        list: list,
+        load: load,
+        quasiquote: quasiquote,
+        quote: quote,
+        read: read,
+        rest: rest,
+        set!: set!,
+        :"slurp-file" => slurp_file,
       }
     end
 
-    def defmacro(exp, frame)
+    def to_string
+      SpecialForm.new { |exp, frame|
+        Formatter.new(eval(exp[1], frame)).format
+      }
+    end
+
+    def my_apply
+      SpecialForm.new { |exp, frame|
+        applicable = eval(exp[1], frame)
+        if special_form?(applicable)
+          apply_special_form(applicable, exp.drop(1), frame)
+        else
+          apply(applicable, eval(exp[2], frame))
+        end
+      }
+    end
+
+    def cond
+      SpecialForm.new { |exp, frame| evcond(exp.drop(1), frame) }
+    end
+
+    def cons
+      SpecialForm.new { |exp, frame|
+        [eval(exp[1], frame), *eval(exp[2], frame)]
+      }
+    end
+
+    def define
+      SpecialForm.new { |exp, frame| eval_define(exp, frame) }
+    end
+
+    def defmacro
+      SpecialForm.new { |exp, frame| define_macro(exp, frame) }
+    end
+
+    def display
+      SpecialForm.new { |exp, frame| print(eval(exp[1], frame)) }
+    end
+
+    def my_eval
+      SpecialForm.new { |exp, frame| eval(eval(exp[1], frame), frame) }
+    end
+
+    def first
+      SpecialForm.new { |exp, frame| evfirst(exp, frame) }
+    end
+
+    def lambda
+      SpecialForm.new { |exp, frame|
+        Closure.new(exp[1], exp[2], frame)
+      }
+    end
+
+    def list
+      SpecialForm.new { |exp, frame| exp.drop(1).map { |e| eval(e, frame) } }
+    end
+
+    def load
+      SpecialForm.new { |exp, frame| Interpreter.new.load_file(exp[1], self) }
+    end
+
+    def my_exit
+      SpecialForm.new { |exp, frame| exit(eval(exp[1], frame)) }
+    end
+
+    def quasiquote
+      SpecialForm.new { |exp, frame| expand_quasiquote(exp[1], frame) }
+    end
+
+    def quote
+      SpecialForm.new { |exp, _| exp[1] }
+    end
+
+    def read
+      SpecialForm.new { |exp, frame| Parser.new(eval(exp[1], frame)).parse }
+    end
+
+    def rest
+      SpecialForm.new { |exp, frame| evrest(exp, frame) }
+    end
+
+    def set!
+      SpecialForm.new { |exp, frame| frame.set!(exp[1], eval(exp[2], frame)) }
+    end
+
+    def slurp_file
+      SpecialForm.new { |exp, frame| File.read(eval(exp[1], frame)) }
+    end
+
+    def define_macro(exp, frame)
       frame.define(
         exp[1][0],
         Macro.new(
