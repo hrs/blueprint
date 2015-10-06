@@ -136,11 +136,13 @@ module Blueprint
     end
 
     def list
-      SpecialForm.new { |exp, frame| exp.drop(1).map { |e| eval(e, frame) } }
+      SpecialForm.new { |exp, frame|
+        exp.drop(1).map { |e| eval(e, frame) }
+      }
     end
 
     def load
-      SpecialForm.new { |exp, frame| Interpreter.new.load_file(exp[1], self) }
+      SpecialForm.new { |exp, _| Interpreter.new.load_file(exp[1], self) }
     end
 
     def my_exit
