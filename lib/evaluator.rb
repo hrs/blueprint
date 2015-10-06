@@ -16,28 +16,30 @@ module Blueprint
     end
 
     def eval(exp, frame = @global_frame)
-      if literal?(exp)
+      if self_evaluating?(exp)
         exp
       elsif symbol?(exp)
         frame.lookup(exp)
-      elsif exp == []
-        []
       elsif macro?(exp.first, frame)
         eval_macro(exp, frame)
       else
-        applicable = eval(exp.first, frame)
-        if special_form?(applicable)
-          apply_special_form(applicable, exp, frame)
-        else
-          apply(
-            applicable,
-            exp.drop(1).map { |arg| eval(arg, frame) },
-          )
-        end
+        apply_applicable(exp, frame)
       end
     end
 
     private
+
+    def apply_applicable(exp, frame)
+      applicable = eval(exp.first, frame)
+      if special_form?(applicable)
+        apply_special_form(applicable, exp, frame)
+      else
+        apply(
+          applicable,
+          exp.drop(1).map { |arg| eval(arg, frame) },
+        )
+      end
+    end
 
     def apply(proc, args)
       if primitive?(proc)
@@ -134,6 +136,10 @@ module Blueprint
       Interpreter.new.load_file(standard_library_file, self)
     end
 
+    def self_evaluating?(exp)
+      literal?(exp) || exp == []
+    end
+
     def literal?(exp)
       exp.is_a?(Fixnum) ||
         exp.is_a?(Float) ||
@@ -186,10 +192,28 @@ module Blueprint
 
     def eval_define(exp, frame)
       if exp[1].is_a?(Array)
-        frame.define(exp[1].first, Closure.new(exp[1].drop(1), exp[2], frame))
+        define_function(exp, frame)
       else
-        frame.define(exp[1], eval(exp[2], frame))
+        define_variable(exp, frame)
       end
+    end
+
+    def define_function(exp, frame)
+      frame.define(
+        exp[1].first,
+        Closure.new(
+          exp[1].drop(1),
+          exp[2],
+          frame,
+        )
+      )
+    end
+
+    def define_variable(exp, frame)
+      frame.define(
+        exp[1],
+        eval(exp[2], frame),
+      )
     end
 
     def evcond(clauses, frame)
