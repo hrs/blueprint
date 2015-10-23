@@ -12,6 +12,10 @@ describe Blueprint::Parser do
       ).to eq([[1, 2, 3, 4]])
 
       expect_parsed_value_of(
+        "#foo bar\n  # foo bar\n(1 2 3 4)\n   # foo bar\n"
+      ).to eq([[1, 2, 3, 4]])
+
+      expect_parsed_value_of(
         "(1 2 \"# foo bar \n\" 3 4)"
       ).to eq([[1, 2, "# foo bar \n", 3, 4]])
     end

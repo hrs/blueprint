@@ -14,7 +14,7 @@ module Blueprint
     root(:program)
 
     rule(:program) do
-      sexpr.repeat.as(:program)
+      (sexpr | comment).repeat.as(:program)
     end
 
     rule(:sexpr) do
