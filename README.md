@@ -2,7 +2,7 @@
 
 A simple little Scheme-derived language implemented in Ruby.
 
-Blueprint is still very tiny, missing a ton of functionality, and has absolutely
+Blueprint is still tiny, missing a ton of functionality, and has absolutely
 atrocious performance. This is all just for fun.
 
 To fire up a REPL:
@@ -64,12 +64,15 @@ Variadic binding:
 (drop-two 1 2 3 4 5 6) # => '(3 4 5 6)
 ```
 
-Macros are non-hygienic (like in Common Lisp). Blueprint supports quasiquoting
-with backticks, commas, and `,@` for splicing, which makes writing macros fairly
-convenient:
+Blueprint is completely dynamic; it does everything at runtime. As such, it
+doesn't have a separate macro-expansion phase and uses [fexprs] to handle forms
+where the evaluation of arguments needs to be delayed. Fexprs are non-hygienic
+(like Common Lisp's macros). Blueprint also emulates Common Lisp-style macros by
+supporting quasiquoting with backticks, commas, and `,@` for splicing, which
+makes writing fexprs convenient:
 
 ```scheme
-(defmacro (unless condition consequent alternative)
+(deffexpr (unless condition consequent alternative)
   `(if (not ,condition)
        ,consequent
        ,alternative))
@@ -78,10 +81,10 @@ convenient:
 Blueprint *doesn't* yet have a `gensym` facility, though, so watch out for
 variable capture! That should be [coming shortly].
 
-One of Blueprint's goals is to make everything `apply`able, including macros:
+One of Blueprint's goals is to make everything `apply`able, including fexprs:
 
 ```scheme
-(defmacro (adder x)
+(deffexpr (adder x)
   `(+ 1 ,x))
 
 (map adder '(1 2 3)) # => '(2 3 4)
@@ -94,7 +97,7 @@ objects:
 (map first '((1 2) (3 4))) # => '(1 3)
 ```
 
-Blueprint has a [standard library] that defines some basic functions and macros,
+Blueprint has a [standard library] that defines some basic functions and fexprs,
 including `let`, `let*`, `if`, `map`, `reduce`, `filter`, `concatenate`, *and
 more*.
 
@@ -112,3 +115,5 @@ To run all of the tests:
 ```sh
 $ rake
 ```
+
+[fexprs]: https://en.wikipedia.org/wiki/Fexpr

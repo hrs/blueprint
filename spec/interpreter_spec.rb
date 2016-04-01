@@ -82,9 +82,9 @@ describe Blueprint::Interpreter do
     ).to eq(720)
   end
 
-  it "supports user-defined macros" do
+  it "supports user-defined fexprs" do
     expect_eval(
-      "(defmacro (my-let bindings body)" \
+      "(deffexpr (my-let bindings body)" \
         "`((lambda ,(map (lambda (binding) (first binding)) bindings)" \
         "    ,body)" \
         "  ,@(map (lambda (binding) (first (rest binding))) bindings)))" \
@@ -92,9 +92,9 @@ describe Blueprint::Interpreter do
     ).to eq(5)
   end
 
-  it "supports defining anaphoric macros" do
+  it "supports defining anaphoric fexprs" do
     expect_eval(
-      "(defmacro (aif condition consequent alternative)" \
+      "(deffexpr (aif condition consequent alternative)" \
       "  `(let ((it ,condition))" \
       "     (if it ,consequent ,alternative)))" \
       "(define (square x) (* x x))" \
@@ -143,7 +143,7 @@ describe Blueprint::Interpreter do
     ).to eq(3)
   end
 
-  describe "syntactic sugar for macros" do
+  describe "syntactic sugar for fexprs" do
     it "expands quasiquoted literals" do
       expect_eval("`4").to eq(4)
     end

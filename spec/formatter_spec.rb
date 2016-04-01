@@ -46,10 +46,10 @@ describe Blueprint::Formatter do
       ).to eq("#<lambda (a b)>")
     end
 
-    it "formats macros" do
+    it "formats fexprs" do
       expect_formatting_for(
-        Blueprint::Macro.new([:a, :b], [])
-      ).to eq("#<macro (a b)>")
+        Blueprint::Fexpr.new([:a, :b], [])
+      ).to eq("#<fexpr (a b)>")
     end
   end
 end

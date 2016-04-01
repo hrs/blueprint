@@ -1,5 +1,5 @@
 require_relative "./closure"
-require_relative "./macro"
+require_relative "./fexpr"
 
 module Blueprint
   class Formatter
@@ -14,8 +14,8 @@ module Blueprint
         format_as_list
       when Closure
         format_as_closure
-      when Macro
-        format_as_macro
+      when Fexpr
+        format_as_fexpr
       when String
         if quote_strings?
           "\"#{expression}\""
@@ -55,8 +55,8 @@ module Blueprint
         ">"
     end
 
-    def format_as_macro
-      "#<macro " +
+    def format_as_fexpr
+      "#<fexpr " +
         subformat(expression.variables) +
         ">"
     end

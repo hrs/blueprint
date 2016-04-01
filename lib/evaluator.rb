@@ -1,6 +1,6 @@
 require_relative "./binder"
 require_relative "./closure"
-require_relative "./macro"
+require_relative "./fexpr"
 require_relative "./special_form"
 
 module Blueprint
@@ -22,8 +22,8 @@ module Blueprint
         frame.lookup(exp)
       elsif exp == []
         []
-      elsif macro?(exp.first, frame)
-        eval_macro(exp, frame)
+      elsif fexpr?(exp.first, frame)
+        eval_fexpr(exp, frame)
       else
         applicable = eval(exp.first, frame)
         if special_form?(applicable)
@@ -77,8 +77,8 @@ module Blueprint
           SpecialForm.new { |exp, frame| [eval(exp[1], frame), *eval(exp[2], frame)] },
         define:
           SpecialForm.new { |exp, frame| eval_define(exp, frame) },
-        defmacro:
-          SpecialForm.new { |exp, frame| defmacro(exp, frame) },
+        deffexpr:
+          SpecialForm.new { |exp, frame| deffexpr(exp, frame) },
         display:
           SpecialForm.new { |exp, frame| print(eval(exp[1], frame)) },
         exit:
@@ -110,10 +110,10 @@ module Blueprint
       }
     end
 
-    def defmacro(exp, frame)
+    def deffexpr(exp, frame)
       frame.define(
         exp[1][0],
-        Macro.new(
+        Fexpr.new(
           exp[1].drop(1),
           exp[2],
         )
@@ -150,11 +150,11 @@ module Blueprint
       exp.is_a?(SpecialForm)
     end
 
-    def macro?(symbol, frame)
-      frame.defined?(symbol) && frame.lookup(symbol).is_a?(Macro)
+    def fexpr?(symbol, frame)
+      frame.defined?(symbol) && frame.lookup(symbol).is_a?(Fexpr)
     end
 
-    def eval_macro(exp, frame)
+    def eval_fexpr(exp, frame)
       eval(
         apply(
           frame.lookup(exp.first).expand(exp.drop(1), frame),

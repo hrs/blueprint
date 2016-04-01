@@ -1,5 +1,5 @@
 module Blueprint
-  class Macro
+  class Fexpr
     attr_reader :variables, :body
 
     def initialize(variables, body)
