@@ -27,6 +27,3 @@ DEPENDENCIES
   parslet
   rake
   rspec
-
-BUNDLED WITH
-   1.10.0.rc
