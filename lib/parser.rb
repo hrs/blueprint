@@ -1,5 +1,5 @@
 require "parslet"
-require_relative "./transformer"
+require_relative "transformer"
 
 module Blueprint
   class Parser < Parslet::Parser

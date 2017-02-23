@@ -1,7 +1,7 @@
-require_relative "./binder"
-require_relative "./closure"
-require_relative "./fexpr"
-require_relative "./special_form"
+require_relative "binder"
+require_relative "closure"
+require_relative "fexpr"
+require_relative "special_form"
 
 module Blueprint
   class Evaluator
@@ -135,7 +135,7 @@ module Blueprint
     end
 
     def literal?(exp)
-      exp.is_a?(Fixnum) ||
+      exp.is_a?(Numeric) ||
         exp.is_a?(Float) ||
         exp.is_a?(String) ||
         exp == true ||

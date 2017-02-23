@@ -3,20 +3,20 @@ require_relative "evaluator"
 
 module Blueprint
   class Interpreter
-    def eval(input, evaluator = evaluator)
+    def eval(input, evaluator = current_evaluator)
       Parser.new(input).parse.
         map { |expr| evaluator.eval(expr) }.
         last
     end
 
-    def load_file(filename, evaluator = evaluator)
+    def load_file(filename, evaluator = current_evaluator)
       eval(File.read(filename), evaluator)
     end
 
     private
 
-    def evaluator
-      @_evaluator ||= Evaluator.new
+    def current_evaluator
+      @_current_evaluator ||= Evaluator.new
     end
   end
 end

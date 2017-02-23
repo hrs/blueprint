@@ -1,5 +1,5 @@
-require_relative "./closure"
-require_relative "./fexpr"
+require_relative "closure"
+require_relative "fexpr"
 
 module Blueprint
   class Formatter
