@@ -1,4 +1,4 @@
-### Blueprint [![Build Status](https://secure.travis-ci.org/hrs/blueprint.png?branch=master&.png)](http://travis-ci.org/hrs/blueprint)
+### Blueprint [![Build Status](https://secure.travis-ci.org/hrs/blueprint.png?branch=master&.png)](http://travis-ci.org/hrs/blueprint) [![Coverage Status](https://coveralls.io/repos/github/hrs/blueprint/badge.svg?branch=master)](https://coveralls.io/github/hrs/blueprint?branch=master)
 
 A simple little Scheme-derived language implemented in Ruby.
 
