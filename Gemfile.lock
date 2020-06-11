@@ -13,7 +13,7 @@ GEM
     json (2.1.0)
     parslet (1.7.1)
       blankslate (>= 2.0, <= 4.0)
-    rake (10.4.2)
+    rake (12.3.3)
     rspec (3.3.0)
       rspec-core (~> 3.3.0)
       rspec-expectations (~> 3.3.0)
